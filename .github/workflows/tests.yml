@@ -30,9 +30,7 @@ jobs:
           npm install
       
       - name: Run frontend tests
-        run: | 
-          cd ..
-          npm run test:frontend
+        run: npm run test:frontend
       
       - name: Run backend tests
         run: npm run test:backend
