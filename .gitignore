@@ -1,6 +1,5 @@
 node_modules
 /coverage/
-/.scannerwork/
 /test-results/
 /playwright-report/
 /blob-report/
