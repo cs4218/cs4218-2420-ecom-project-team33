@@ -61,6 +61,7 @@ describe("createCategoryController test", () => {
     expect(categoryModel.findOne).toHaveBeenCalledWith({ name: "Furniture" });
     // expect(slugify).toHaveBeenCalledTimes(1);
     // expect(slugifySpy).toHaveBeenCalledWith("Furniture");
+    expect(categoryModel.prototype.save).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
@@ -100,54 +101,113 @@ describe("updateCategoryController", () => {
     };
   });
 
+  it("should return 400 if category ID is missing", async () => {
+    req = { params: {}, body: { name: "Book" } };
+
+    await updateCategoryController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Category ID is required",
+    });
+  });
+
+  it("should return 400 if category name is missing or invalid", async () => {
+    req = { params: { id: "66db427fdb0119d9234b27ef" }, body: { name: "" } };
+    await updateCategoryController(req, res);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Valid category name is required",
+    });
+
+    req = { params: { id: "66db427fdb0119d9234b27ef" }, body: {} };
+    await updateCategoryController(req, res);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Valid category name is required",
+    });
+
+    req = { params: { id: "66db427fdb0119d9234b27ef" }, body: { name: "   " } };
+    await updateCategoryController(req, res);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Valid category name is required",
+    });
+
+    req = { params: { id: "66db427fdb0119d9234b27ef" }, body: { name: 123 } };
+    await updateCategoryController(req, res);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Valid category name is required",
+    });
+  });
+
+  it("should return 404 if category provided does not exist", async () => {
+    const categoryId = "66db427fdb0119d9234b27ef";
+    const categoryName = "Book";
+    const req = { params: { id: categoryId }, body: { name: categoryName } };
+    categoryModel.findById = jest.fn().mockResolvedValue(null);
+    await updateCategoryController(req, res);
+
+    expect(categoryModel.findById).toHaveBeenCalledWith(categoryId);
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Category not found",
+    });
+  });
+
   it("should successfully update category and return status 200", async () => {
-    const categoryId = "category123";
-    const categoryName = "NewCategory";
+    const categoryId = "66db427fdb0119d9234b27ef";
+    const categoryName = "Book";
 
     const mockCategory = {
       id: categoryId,
       name: categoryName,
-      slug: "new-category",
+      slug: "book",
     };
-
+    categoryModel.findById = jest.fn().mockResolvedValue({
+      id: categoryId,
+      name: "OldCategory",
+      slug: "old-category",
+    });
     categoryModel.findByIdAndUpdate = jest.fn().mockResolvedValue(mockCategory);
     const req = { params: { id: categoryId }, body: { name: categoryName } };
 
     await updateCategoryController(req, res);
 
+    expect(categoryModel.findById).toHaveBeenCalledWith(categoryId);
+    expect(categoryModel.findByIdAndUpdate).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      messsage: "Category Updated Successfully",
+      message: "Category Updated Successfully",
       category: mockCategory,
     });
     // expect(slugify).toHaveBeenCalledWith(categoryName);
   });
 
-  // it("should handle errors and return status 500 if something goes wrong", async () => {
-  //   const categoryId = "category123";
-  //   const categoryName = "New Category";
+  it("should handle errors and return status 500 if something goes wrong", async () => {
+    const categoryId = "66db427fdb0119d9234b27ef";
+    const categoryName = "Book";
+    const req = { params: { id: categoryId }, body: { name: categoryName } };
 
-  //   // Simulate an error in the controller
-  //   const req = { params: { id: categoryId }, body: { name: categoryName } };
-  //   const res = {
-  //     status: jest.fn().mockReturnThis(),
-  //     send: jest.fn(),
-  //   };
+    categoryModel.findByIdAndUpdate.mockRejectedValue(
+      new Error("Database Error")
+    );
 
-  //   // Mock an error when finding/updating the category
-  //   mockingoose(categoryModel).toReturn(
-  //     new Error("Database Error"),
-  //     "findOneAndUpdate"
-  //   );
+    await updateCategoryController(req, res);
 
-  //   await updateCategoryController(req, res);
-
-  //   expect(res.status).toHaveBeenCalledWith(500);
-  //   expect(res.send).toHaveBeenCalledWith({
-  //     success: false,
-  //     error: new Error("Database Error"),
-  //     message: "Error while updating category",
-  //   });
-  // });
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      error: new Error("Database Error"),
+      message: "Error while updating category",
+    });
+  });
 });
