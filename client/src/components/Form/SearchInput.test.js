@@ -43,6 +43,7 @@ describe("Search Input Component", () => {
     const submitButton = getByTestId("search-btn");
 
     // Perform input and submit actions
+    fireEvent.change(searchField, { target: { value: 'te' } });
     fireEvent.change(searchField, { target: { value: 'test' } });
     fireEvent.click(submitButton);
 
