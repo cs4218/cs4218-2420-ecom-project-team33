@@ -78,7 +78,6 @@ describe("Search Input Component", () => {
   });
 
   it('should handle and log api error', async () => {
-    
     // Mock Axios, Logger, UseSearch Hook
     axios.get.mockRejectedValueOnce(new Error("mock error!"));
     useSearch.mockReturnValue([{ keyword: "test" }, jest.fn()]);
