@@ -27,26 +27,6 @@ const MockComponent = () => {
 
 describe('useSearch Hook', () => {
 
-  it('should initialize search state from localStorage', () => {
-    // Spy on localstorage and mock the return value
-    jest.spyOn(window.localStorage.__proto__, 'getItem')
-    .mockReturnValue(JSON.stringify({ keyword: "mock", results: [ GAMING_MOUSE.name ] }));
-
-    // Render Mock Component
-    const { getByTestId, getByText } = render(
-      <SearchProvider>
-        <MockComponent />
-      </SearchProvider>
-    );
-
-    // Get mock input element
-    const mockSearch = getByTestId("mock-search");
-
-    // Should contain following values
-    expect(mockSearch.value).toBe("mock");
-    expect(getByText(GAMING_MOUSE.name)).toBeInTheDocument;
-  });
-
   it('should update and display the entered value correctly!', () => {
     // Render Mock Component
     const { getByTestId } = render(
@@ -84,6 +64,26 @@ describe('useSearch Hook', () => {
     expect(getByText("mock1")).toBeInTheDocument;
     expect(getByText("mock2")).toBeInTheDocument;
     expect(getByText("mock3")).toBeInTheDocument;
+  });
+
+  it('should initialize search state from localStorage', () => {
+    // Spy on localstorage and mock the return value
+    jest.spyOn(window.localStorage.__proto__, 'getItem')
+    .mockReturnValue(JSON.stringify({ keyword: "mock", results: [ GAMING_MOUSE.name ] }));
+
+    // Render Mock Component
+    const { getByTestId, getByText } = render(
+      <SearchProvider>
+        <MockComponent />
+      </SearchProvider>
+    );
+
+    // Get mock input element
+    const mockSearch = getByTestId("mock-search");
+
+    // Should contain following values
+    expect(mockSearch.value).toBe("mock");
+    expect(getByText(GAMING_MOUSE.name)).toBeInTheDocument;
   });
 
 });
