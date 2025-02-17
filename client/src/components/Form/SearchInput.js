@@ -1,10 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useSearch } from "../../context/search";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+
 const SearchInput = () => {
   const [values, setValues] = useSearch();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname !== "/search") {
+      setValues({ keyword: "", results: []});
+      localStorage.removeItem("search");
+    }
+  }, [location]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -13,6 +22,7 @@ const SearchInput = () => {
         `/api/v1/product/search/${values.keyword}`
       );
       setValues({ ...values, results: data });
+      localStorage.setItem("search", JSON.stringify({ keyword: values.keyword, results: data }));
       navigate("/search");
     } catch (error) {
       console.log(error);

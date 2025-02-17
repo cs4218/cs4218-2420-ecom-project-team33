@@ -2,7 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import SearchInput from './SearchInput';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useSearch } from '../../context/search';
 
 // Mock Axios
@@ -12,6 +12,7 @@ jest.mock('axios');
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useNavigate: jest.fn(),
+  useLocation: jest.fn()
 }));
 
 // Mock UseSearch Hook
@@ -24,6 +25,12 @@ describe("Search Input Component", () => {
   // Mock Navigate Hook
   const mockNavigate = jest.fn();
   useNavigate.mockReturnValue(mockNavigate);
+  useLocation.mockReturnValue({
+    pathname: '/',
+    search: '',
+    hash: '',
+    state: undefined,
+  });
 
   // Clear all mocks before each test
   beforeEach(() => {
