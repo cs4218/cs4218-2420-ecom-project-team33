@@ -24,7 +24,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "cd .. && npm run test:frontend",
+    "test": "cd .. && npm run ci:frontend",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
