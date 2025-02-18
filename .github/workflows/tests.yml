@@ -34,9 +34,11 @@ jobs:
         with:
           custom-title: Coverage report for frontend
           test-script: npm run test:frontend
+          json-summary-path: client/report.json
       
       - name: Run backend tests
         uses: ArtiomTr/jest-coverage-report-action@v2
         with:
           custom-title: Coverage report for backend
           test-script: npm run test:backend
+          json-summary-path: report.json
