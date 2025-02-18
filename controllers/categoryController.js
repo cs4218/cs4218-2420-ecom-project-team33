@@ -83,7 +83,7 @@ export const updateCategoryController = async (req, res) => {
 };
 
 // get all cat
-export const categoryControlller = async (req, res) => {
+export const categoryController = async (req, res) => {
   try {
     const category = await categoryModel.find({});
     res.status(200).send({
@@ -104,18 +104,31 @@ export const categoryControlller = async (req, res) => {
 // single category
 export const singleCategoryController = async (req, res) => {
   try {
-    const category = await categoryModel.findOne({ slug: req.params.slug });
+    const { slug } = req.params;
+    if (!slug) {
+      return res.status(400).send({
+        success: false,
+        message: "Slug parameter is required",
+      });
+    }
+    const category = await categoryModel.findOne({ slug });
+    if (!category) {
+      return res.status(404).send({
+        success: false,
+        message: "Category not found",
+      });
+    }
     res.status(200).send({
       success: true,
-      message: "Get SIngle Category SUccessfully",
+      message: "Get single category successfully",
       category,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).send({
       success: false,
-      error,
-      message: "Error While getting Single Category",
+      error: error.message,
+      message: "Error while getting single category",
     });
   }
 };
