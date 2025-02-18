@@ -29,7 +29,7 @@ export const createCategoryController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      error: error,
+      error: error.message,
       message: "Error in Category",
     });
   }
@@ -76,7 +76,7 @@ export const updateCategoryController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      error: error,
+      error: error.message,
       message: "Error while updating category",
     });
   }
@@ -95,7 +95,7 @@ export const categoryController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      error,
+      error: error.message,
       message: "Error while getting all categories",
     });
   }
@@ -134,20 +134,34 @@ export const singleCategoryController = async (req, res) => {
 };
 
 //delete category
-export const deleteCategoryCOntroller = async (req, res) => {
+export const deleteCategoryController = async (req, res) => {
   try {
     const { id } = req.params;
-    await categoryModel.findByIdAndDelete(id);
+    if (!id) {
+      return res.status(400).send({
+        success: false,
+        message: "Category ID is required",
+      });
+    }
+
+    const deletedCategory = await categoryModel.findByIdAndDelete(id);
+    if (!deletedCategory) {
+      return res.status(404).send({
+        success: false,
+        message: "Category not found",
+      });
+    }
+
     res.status(200).send({
       success: true,
-      message: "Categry Deleted Successfully",
+      message: "Category deleted successfully",
     });
   } catch (error) {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "error while deleting category",
-      error,
+      message: "Error while deleting category",
+      error: error.message,
     });
   }
 };
