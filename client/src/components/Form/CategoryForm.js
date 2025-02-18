@@ -6,6 +6,7 @@ const CategoryForm = ({ handleSubmit, value, setValue }) => {
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
           <input
+            data-testid="category-form-input"
             type="text"
             className="form-control"
             placeholder="Enter new category"
@@ -14,7 +15,7 @@ const CategoryForm = ({ handleSubmit, value, setValue }) => {
           />
         </div>
 
-        <button type="submit" className="btn btn-primary">
+        <button data-testid="category-form-button" type="submit" className="btn btn-primary">
           Submit
         </button>
       </form>

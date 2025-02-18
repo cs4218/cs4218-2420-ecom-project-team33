@@ -33,12 +33,14 @@ jobs:
       - name: Run frontend tests
         uses: ArtiomTr/jest-coverage-report-action@v2
         with:
-          working-directory: client
           custom-title: Coverage report for frontend
+          working-directory: client
+          skip-step: install
           test-script: npm run test
       
       - name: Run backend tests
         uses: ArtiomTr/jest-coverage-report-action@v2
         with:
           custom-title: Coverage report for backend
-          test-script: npm run test:backend
+          skip-step: install
+          test-script: npm run ci:backend

@@ -37,6 +37,26 @@ describe("Search Input Component", () => {
     jest.clearAllMocks();
   });
 
+  it('should render correctly', () => {
+    // Mock UseSearch Hook
+    useSearch.mockReturnValue([{ keyword: "" }, jest.fn()]);
+
+    // Render Test Component
+    const { getByTestId } = render(<SearchInput />);
+
+    // Get Form Elements
+    const searchField = getByTestId("search");
+    const submitButton = getByTestId("search-btn");
+
+    // Should render the following correctly
+    expect(searchField).toBeInTheDocument;
+    expect(searchField.getAttribute("placeholder")).toBe("Search");
+    expect(searchField.getAttribute("type")).toBe("search");
+    expect(searchField.value).toBe("");
+    expect(submitButton).toBeInTheDocument;
+    expect(submitButton.getAttribute("type")).toBe("submit");
+  });
+
   it('should correctly receive the search keyword and navigate to /search', async () => {
     // Mock Axios, UseSearch Hook
     axios.get.mockResolvedValueOnce({ data: [] });
