@@ -2,7 +2,6 @@ import Categories from "./Categories";
 import { render } from "@testing-library/react";
 import { CLOTHING, ELECTRONICS, BOOKS, mockCategories } from "../mocks/categories";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
-import { beforeEach } from "node:test";
 import '@testing-library/jest-dom/extend-expect';
 
 jest.mock('../context/auth', () => ({
@@ -23,17 +22,6 @@ jest.mock('../hooks/useCategory', () => ({
 }));
 
 describe("Categories Page", () => {
-
-  beforeEach(() => {
-    global.window = Object.create(window);
-    const url = "http://dummy.com";
-    Object.defineProperty(window, "location", {
-        value: {
-          href: url
-        },
-        writable: true
-    });
-  });
 
   it("should render correctly", () => {
     // Render Categories Page
