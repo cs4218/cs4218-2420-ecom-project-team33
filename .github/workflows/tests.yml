@@ -10,6 +10,7 @@ on:
   
 jobs:
   test:
+    permissions: write-all
     runs-on: ubuntu-latest
 
     steps:
@@ -30,7 +31,6 @@ jobs:
           npm install
       
       - name: Run frontend tests
-        permissions: write-all
         uses: ArtiomTr/jest-coverage-report-action@v2
         with:
           working-directory: client
@@ -38,7 +38,6 @@ jobs:
           test-script: npm run test
       
       - name: Run backend tests
-        permissions: write-all
         uses: ArtiomTr/jest-coverage-report-action@v2
         with:
           custom-title: Coverage report for backend
