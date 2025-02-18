@@ -7,3 +7,4 @@ node_modules
 /playwright/.cache/
 .env
 sonar-project.properties
+report.json
