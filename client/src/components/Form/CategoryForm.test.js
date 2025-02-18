@@ -6,7 +6,7 @@ describe("Category Form Component", () => {
 
   // Mock the props
   const mockCategory = "electronics";
-  const mockSubmit = jest.fn();
+  const mockSubmit = jest.fn().mockImplementation((e) => e.preventDefault());;
   const mockSetter = jest.fn();
   const mockNewCategory = "sports";
 
