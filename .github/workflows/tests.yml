@@ -34,3 +34,8 @@ jobs:
       
       - name: Run backend tests
         run: npm run test:backend
+              
+      - name: Generate test report
+        uses: ArtiomTr/jest-coverage-report-action@v2
+        with:
+          test-script: npm run test
