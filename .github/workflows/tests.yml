@@ -30,12 +30,13 @@ jobs:
           npm install
       
       - name: Run frontend tests
-        run: npm run test:frontend
-      
-      - name: Run backend tests
-        run: npm run test:backend
-              
-      - name: Generate test report
         uses: ArtiomTr/jest-coverage-report-action@v2
         with:
-          test-script: npm run test
+          custom-title: Coverage report for frontend
+          test-script: npm run test:frontend
+      
+      - name: Run backend tests
+        uses: ArtiomTr/jest-coverage-report-action@v2
+        with:
+          custom-title: Coverage report for backend
+          test-script: npm run test:backend
