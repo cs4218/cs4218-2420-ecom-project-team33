@@ -1,4 +1,4 @@
-import PageNotFound from "./PageNotFound";
+import PageNotFound from "./Pagenotfound";
 import { render } from "@testing-library/react";
 import '@testing-library/jest-dom/extend-expect';
 import { MemoryRouter } from "react-router-dom";
