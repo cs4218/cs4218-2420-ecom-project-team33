@@ -16,15 +16,19 @@ describe("Footer Component", () => {
 
     // Expect following
     expect(getByText("All Rights Reserved © TestingComp")).toBeInTheDocument();
-
     expect(aboutLink).toBeInTheDocument();
-    expect(aboutLink).toHaveAttribute('href', '/about');
-
     expect(policyLink).toBeInTheDocument();
-    expect(policyLink).toHaveAttribute('href', '/policy');
-
     expect(contactLink).toBeInTheDocument();
-    expect(contactLink).toHaveAttribute('href', '/contact');
+  });
+
+  it("should navigate to correct page", () => {
+    // Render component
+    const { getByText } = render(<MemoryRouter><Footer /></MemoryRouter>);
+
+    // Expect following
+    expect(getByText("About")).toHaveAttribute('href', '/about');
+    expect(getByText("Privacy Policy")).toHaveAttribute('href', '/policy');
+    expect(getByText("Contact")).toHaveAttribute('href', '/contact');
   });
 
 });
