@@ -1,9 +1,13 @@
 import { createProductController } from "../controllers/productController";
-
 import mongoose from "mongoose";
-import { jest } from "@jest/globals";
+import productModel from "../models/productModel.js";
+import fs from "fs";
+import slugify from "slugify";
+import { error } from "console";
 
 jest.mock("braintree");
+jest.mock("fs");
+jest.mock("slugify", () => jest.fn(() => 'test-product'));
 jest.mock("../models/productModel");
 
 describe("createProductController tests", () => {
@@ -29,6 +33,8 @@ describe("createProductController tests", () => {
       status: jest.fn().mockReturnThis(),
       send: jest.fn(),
     };
+
+    fs.readFileSync.mockReturnValue(Buffer.from("fake-image-data"));
   });
 
   test("Should return error 500 if required field is missing", async () => {
@@ -49,24 +55,45 @@ describe("createProductController tests", () => {
     }
   });
 
-  test("Should successfully create product with valid fields", async () => {
+  test("Should create product with required fields and photo exactly at size limit 999999 bytes", async () => {
     req.fields = { ...validProduct };
+    req.files.photo = {
+      size: 999999,
+      path: "test/path",
+      type: "image/jpeg"
+    };
+
+    slugify.mockReturnValue("test-slug");
+
+    productModel.mockImplementation((data) => ({
+        data,
+        photo: {
+          data: null,
+          contentType: null
+        },
+        save: jest.fn().mockResolvedValue()
+    }));
 
     await createProductController(req, res);
 
+    expect(productModel).toHaveBeenCalledWith({
+        ...req.fields,
+        slug: "test-slug",
+    });
+    
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.send).toHaveBeenCalledWith({
-      success: true,
-      message: "Product Created Successfully",
-      products: expect.any(Object)
+        success: true,
+        message: "Product Created Successfully",
+        products: expect.any(Object)
     });
   });
 
-  test("Should return error 500 if photo size is too large", async () => {
+  test("Should return error 500 if photo size is exactly 1MB", async () => {
     req.fields = { ...validProduct };
     req.files = {
       photo: {
-        size: 1100000,
+        size: 1000000,
         path: "test/path",
         type: "image/jpeg"
       }
@@ -76,8 +103,38 @@ describe("createProductController tests", () => {
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
-      error: "photo is Required and should be less then 1mb"
+      error: "photo should be less then 1mb"
     });
   });
+
+  test("Should return error 500 if unable to save to DB", async () => {
+    req.fields = { ...validProduct };
+    req.files.photo = {
+      size: 800000,
+      path: "test/path",
+      type: "image/jpeg"
+    };
+
+    productModel.mockImplementation((data) => ({
+        data,
+        photo: {
+          data: null,
+          contentType: null
+        },
+        save: jest.fn(() => {
+            throw new Error("Unable to save to DB");
+        })
+    }));
+
+    await createProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        error: expect.any(Error),
+        message: "Error in creating product"
+    })
+  });
 }
+
 );
