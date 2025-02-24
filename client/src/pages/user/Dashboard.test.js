@@ -25,7 +25,7 @@ describe("Dashboard Page", () => {
 
   it("should render correctly", () => {
     // Mock useAuth hook
-    useAuth.mockReturnValue([{user: { name: "test", email: "test@test.com", address: "school of computing", role: 0 }}, jest.fn()]);
+    useAuth.mockReturnValue([{user: { name: "test", email: "test@test.com", address: "school of computing", phone: "12345678", role: 0 }}, jest.fn()]);
 
     // Render Dashboard Page
     const { getByText, getByRole } = render( <MemoryRouter initialEntries={['/dashboard/user']}>
@@ -39,6 +39,7 @@ describe("Dashboard Page", () => {
     expect(getByText("Email")).toBeInTheDocument();
     expect(getByText("Address")).toBeInTheDocument();
     expect(getByRole("heading", { name: "test" })).toBeInTheDocument();
+    expect(getByRole("heading", { name: "12345678" })).toBeInTheDocument();
     expect(getByRole("heading", { name: "test@test.com" })).toBeInTheDocument();
     expect(getByRole("heading", { name: "school of computing" })).toBeInTheDocument();
   });
@@ -59,6 +60,7 @@ describe("Dashboard Page", () => {
     expect(getByText("Email")).toBeInTheDocument();
     expect(getByText("Address")).toBeInTheDocument();
     expect(getByText("Name not available at the moment.")).toBeInTheDocument();
+    expect(getByText("Contact not available at the moment.")).toBeInTheDocument();
     expect(getByText("Email not available at the moment.")).toBeInTheDocument();
     expect(getByText("Address not available at the moment.")).toBeInTheDocument();
   });
