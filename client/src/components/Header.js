@@ -127,11 +127,12 @@ const Header = () => {
                 </>
               )}
               <li className="nav-item">
-                <Badge count={(cart ?? []).length} showZero>
+                <div style={{ display: "flex", flexDirection: "row", color: "black"}}>
                   <NavLink to="/cart" className="nav-link">
                     Cart
                   </NavLink>
-                </Badge>
+                  <Badge style={{ marginLeft: "-15px" }} count={(cart ?? []).length} showZero />
+                </div>                  
               </li>
             </ul>
           </div>
