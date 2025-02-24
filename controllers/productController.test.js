@@ -1,7 +1,8 @@
 import { 
     createProductController,
     getProductController,
-    getSingleProductController
+    getSingleProductController,
+    deleteProductController
  } from "../controllers/productController";
 
 import productModel from "../models/productModel.js";
@@ -43,205 +44,257 @@ describe("Product Controller tests", () => {
     fs.readFileSync.mockReturnValue(Buffer.from("fake-image-data"));
   });
 
-  test("Should return error 500 if required field is missing", async () => {
-    const requiredFields = ["name", "description", "price", "category", "quantity"];
-
-    for (const requiredField of requiredFields) {
-      req.fields = { ...validProduct };
-      req.fields[requiredField] = "";
-
-      await createProductController(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.send).toHaveBeenCalledWith({
-        error: `${requiredField.charAt(0).toUpperCase() + requiredField.slice(1)} is Required`,
+  describe("createProductController tests", () => {
+    test("Should return error 500 if required field is missing", async () => {
+        const requiredFields = ["name", "description", "price", "category", "quantity"];
+    
+        for (const requiredField of requiredFields) {
+          req.fields = { ...validProduct };
+          req.fields[requiredField] = "";
+    
+          await createProductController(req, res);
+    
+          expect(res.status).toHaveBeenCalledWith(500);
+          expect(res.send).toHaveBeenCalledWith({
+            error: `${requiredField.charAt(0).toUpperCase() + requiredField.slice(1)} is Required`,
+          });
+    
+          jest.clearAllMocks();
+        }
       });
 
-      jest.clearAllMocks();
-    }
-  });
-
-  test("Should create product with required fields and photo exactly at size limit 999999 bytes", async () => {
-    req.fields = { ...validProduct };
-    req.files.photo = {
-      size: 999999,
-      path: "test/path",
-      type: "image/jpeg"
-    };
-
-    slugify.mockReturnValue("test-slug");
-
-    productModel.mockImplementation((data) => ({
-        data,
-        photo: {
-          data: null,
-          contentType: null
-        },
-        save: jest.fn().mockResolvedValue()
-    }));
-
-    await createProductController(req, res);
-
-    expect(productModel).toHaveBeenCalledWith({
-        ...req.fields,
-        slug: "test-slug",
-    });
+      test("Should create product with required fields and photo exactly at size limit 999999 bytes", async () => {
+        req.fields = { ...validProduct };
+        req.files.photo = {
+          size: 999999,
+          path: "test/path",
+          type: "image/jpeg"
+        };
     
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.send).toHaveBeenCalledWith({
-        success: true,
-        message: "Product Created Successfully",
-        products: expect.any(Object)
-    });
-  });
-
-  test("Should return error 500 if photo size is exactly 1MB", async () => {
-    req.fields = { ...validProduct };
-    req.files = {
-      photo: {
-        size: 1000000,
-        path: "test/path",
-        type: "image/jpeg"
-      }
-    };
-
-    await createProductController(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.send).toHaveBeenCalledWith({
-      error: "photo should be less then 1mb"
-    });
-  });
-
-  test("Should return error 500 if unable to save to DB", async () => {
-    req.fields = { ...validProduct };
-    req.files.photo = {
-      size: 800000,
-      path: "test/path",
-      type: "image/jpeg"
-    };
-
-    productModel.mockImplementation((data) => ({
-        data,
-        photo: {
-          data: null,
-          contentType: null
-        },
-        save: jest.fn(() => {
-            throw new Error("Unable to save to DB");
+        slugify.mockReturnValue("test-slug");
+    
+        productModel.mockImplementation((data) => ({
+            data,
+            photo: {
+              data: null,
+              contentType: null
+            },
+            save: jest.fn().mockResolvedValue()
+        }));
+    
+        await createProductController(req, res);
+    
+        expect(productModel).toHaveBeenCalledWith({
+            ...req.fields,
+            slug: "test-slug",
+        });
+        
+        expect(res.status).toHaveBeenCalledWith(201);
+        expect(res.send).toHaveBeenCalledWith({
+            success: true,
+            message: "Product Created Successfully",
+            products: expect.any(Object)
+        });
+      });
+    
+      test("Should return error 500 if photo size is exactly 1MB", async () => {
+        req.fields = { ...validProduct };
+        req.files = {
+          photo: {
+            size: 1000000,
+            path: "test/path",
+            type: "image/jpeg"
+          }
+        };
+    
+        await createProductController(req, res);
+    
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith({
+          error: "photo should be less then 1mb"
+        });
+      });
+    
+      test("Should return error 500 if unable to save to DB", async () => {
+        req.fields = { ...validProduct };
+        req.files.photo = {
+          size: 800000,
+          path: "test/path",
+          type: "image/jpeg"
+        };
+    
+        productModel.mockImplementation((data) => ({
+            data,
+            photo: {
+              data: null,
+              contentType: null
+            },
+            save: jest.fn(() => {
+                throw new Error("Unable to save to DB");
+            })
+        }));
+    
+        await createProductController(req, res);
+    
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith({
+            success: false,
+            error: expect.any(Error),
+            message: "Error in creating product"
         })
-    }));
-
-    await createProductController(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.send).toHaveBeenCalledWith({
-        success: false,
-        error: expect.any(Error),
-        message: "Error in creating product"
-    })
+      });
   });
 
-  test("Should return all products with a 200 status code", async () => {
-    const mockProducts = [
-      { _id: "1", name: "Product 1", category: "Category 1" },
-      { _id: "2", name: "Product 2", category: "Category 2" },
-    ];
-
-    productModel.find.mockReturnValue({
-      populate: jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          limit: jest.fn().mockReturnValue({
-            sort: jest.fn().mockResolvedValue(mockProducts),
-          }),
-        }),
-      }),
-    });
-
-    await getProductController(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.send).toHaveBeenCalledWith({
-      success: true,
-      counTotal: mockProducts.length,
-      message: "All Products ",
-      products: mockProducts,
-    });
-  });
-
-  test("Should return error 500 with DB error", async () => {
-    const mockProducts = [
-      { _id: "1", name: "Product 1", category: "Category 1" },
-      { _id: "2", name: "Product 2", category: "Category 2" },
-    ];
-
-    productModel.find.mockReturnValue({
-      populate: jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          limit: jest.fn().mockReturnValue({
-            sort: jest.fn(() => {
-                throw new Error("DB error");
+  describe("getProductController tests", () => {
+    test("Should return all products with a 200 status code", async () => {
+        const mockProducts = [
+          { _id: "1", name: "Product 1", category: "Category 1" },
+          { _id: "2", name: "Product 2", category: "Category 2" },
+        ];
+    
+        productModel.find.mockReturnValue({
+          populate: jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnValue({
+              limit: jest.fn().mockReturnValue({
+                sort: jest.fn().mockResolvedValue(mockProducts),
+              }),
             }),
           }),
-        }),
-      }),
-    });
-
-    await getProductController(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.send).toHaveBeenCalledWith({
-        success: false,
-        message: "Error in getting products",
-        error: "DB error",
-    });
-  });
-
-  test("Should return single product with 200 status code", async () => {
-    req = {
-        params: { slug: "product-1" }, 
-    };
-
-    const mockProduct = { _id: "1", name: "Product 1", category: "Category 1" };
-  
-      productModel.findOne.mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          populate: jest.fn().mockResolvedValue(mockProduct),
-        }),
+        });
+    
+        await getProductController(req, res);
+    
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.send).toHaveBeenCalledWith({
+          success: true,
+          counTotal: mockProducts.length,
+          message: "All Products ",
+          products: mockProducts,
+        });
       });
-  
-      await getSingleProductController(req, res);
-  
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.send).toHaveBeenCalledWith({
-        success: true,
-        message: "Single Product Fetched",
-        product: mockProduct,
-      });
-  });
-
-  test("Should return error 500 with DB error", async () => {
-    req = {
-        params: { slug: "product-1" }, 
-    };
-
-    const mockProduct = { _id: "1", name: "Product 1", category: "Category 1" };
-  
-      productModel.findOne.mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          populate: jest.fn(() => {
-            throw new Error("DB error");
+    
+      test("Should return error 500 with DB error", async () => {
+        const mockProducts = [
+          { _id: "1", name: "Product 1", category: "Category 1" },
+          { _id: "2", name: "Product 2", category: "Category 2" },
+        ];
+    
+        productModel.find.mockReturnValue({
+          populate: jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnValue({
+              limit: jest.fn().mockReturnValue({
+                sort: jest.fn(() => {
+                    throw new Error("DB error");
+                }),
+              }),
+            }),
           }),
-        }),
+        });
+    
+        await getProductController(req, res);
+    
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith({
+            success: false,
+            message: "Error in getting products",
+            error: "DB error",
+        });
       });
+  });
+
+  describe("getSingleProductController tests", () => {
+    test("Should return single product with 200 status code", async () => {
+        req = {
+            params: { slug: "product-1" }, 
+        };
+    
+        const mockProduct = { _id: "1", name: "Product 1", category: "Category 1" };
+      
+          productModel.findOne.mockReturnValue({
+            select: jest.fn().mockReturnValue({
+              populate: jest.fn().mockResolvedValue(mockProduct),
+            }),
+          });
+      
+          await getSingleProductController(req, res);
+      
+          expect(res.status).toHaveBeenCalledWith(200);
+          expect(res.send).toHaveBeenCalledWith({
+            success: true,
+            message: "Single Product Fetched",
+            product: mockProduct,
+          });
+      });
+    
+      test("Should return error 500 with DB error", async () => {
+        req = {
+            params: { slug: "product-1" }, 
+        };
+    
+        const mockProduct = { _id: "1", name: "Product 1", category: "Category 1" };
+      
+          productModel.findOne.mockReturnValue({
+            select: jest.fn().mockReturnValue({
+              populate: jest.fn(() => {
+                throw new Error("DB error");
+              }),
+            }),
+          });
+      
+          await getSingleProductController(req, res);
+      
+          expect(res.status).toHaveBeenCalledWith(500);
+          expect(res.send).toHaveBeenCalledWith({
+            success: false,
+            message: "Error while getitng single product",
+            error: expect.any(Error),
+          });
+      });
+  });
   
-      await getSingleProductController(req, res);
-  
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.send).toHaveBeenCalledWith({
-        success: false,
-        message: "Error while getitng single product",
-        error: expect.any(Error),
+  describe("deleteProductController tests", () => {
+    test("Should delete product successfully with status 200 for correct PID", async () => {
+        req = {
+            params: {
+                pid: new mongoose.Types.ObjectId(),
+            },
+        };
+    
+        productModel.findByIdAndDelete.mockImplementation((pid) => ({
+            _id: pid,
+            select: jest.fn(),
+        }));
+    
+        await deleteProductController(req, res);
+    
+        expect(productModel.findByIdAndDelete).toHaveBeenCalledWith(req.params.pid);
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.send).toHaveBeenCalledWith({
+            success: true,
+            message: "Product Deleted successfully",
+        })
+      });
+    
+      test("Should return error with status 600 for non-existent PID", async () => {
+        req = {
+            params: {
+                pid: new mongoose.Types.ObjectId(),
+            },
+        };
+    
+        productModel.findByIdAndDelete.mockImplementation((pid) => {
+            throw new Error("pid does not exist");
+        });
+    
+        await deleteProductController(req, res);
+    
+        expect(productModel.findByIdAndDelete).toHaveBeenCalledWith(req.params.pid);
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith({
+            success: false,
+            message: "Error while deleting product",
+            error: expect.any(Error),
+        })
       });
   });
 }
