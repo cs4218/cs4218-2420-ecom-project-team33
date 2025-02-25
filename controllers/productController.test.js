@@ -2,7 +2,8 @@ import {
     createProductController,
     getProductController,
     getSingleProductController,
-    deleteProductController
+    deleteProductController,
+    updateProductController
  } from "../controllers/productController";
 
 import productModel from "../models/productModel.js";
@@ -297,6 +298,241 @@ describe("Product Controller tests", () => {
         })
       });
   });
+
+  describe("updateProductController tests", () => {
+        test("Pairwise test 1 - Missing photo, description, price, quantity should return error 500", async () => {
+            const missingFields = ["description", "price", "quantity"];
+            req.fields = { ...validProduct };
+
+            for (const missingField of missingFields) {
+                req.fields[missingField] = "";
+            }
+
+            await updateProductController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(500);
+        });
+
+        test("Pairwise test 2 - Missing photo, name, category, shipping should return error 500", async () => {
+            const missingFields = ["name", "category", "shipping"];
+            req.fields = { ...validProduct };
+
+            for (const missingField of missingFields) {
+                req.fields[missingField] = "";
+            }
+
+            await updateProductController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(500);
+        });
+
+        test("Pairwise test 3 - Valid photo, missing price, category, shipping should return error 500", async () => {
+            const missingFields = ["price", "category", "shipping"];
+            req.fields = { ...validProduct };
+            req.files.photo = {
+                size: 999999,
+                path: "test/path",
+                type: "image/jpeg"
+              };
+
+            for (const missingField of missingFields) {
+                req.fields[missingField] = "";
+            }
+
+            await updateProductController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(500);
+        });
+
+        test("Pairwise test 4 - Valid photo, no missing fields should update product successfully", async () => {
+            slugify.mockReturnValue("test-product");
+            const mockPhoto = {
+                photo: {
+                    size: 999999,
+                    path: "./test/img",
+                    type: "image/jpeg",
+                  },
+            }
+
+            const req = {
+              params: {
+                pid: new mongoose.Types.ObjectId(),
+              },
+              fields: { ...validProduct },
+              files: { ...mockPhoto },
+            };
+
+            const mockProducts = {
+                ...validProduct,
+                photo: mockPhoto,
+                save: jest.fn(),
+            }
+
+            productModel.findByIdAndUpdate.mockImplementation((pid, field, nw) => mockProducts);
+
+            await updateProductController(req, res);
+
+            expect(productModel.findByIdAndUpdate).toHaveBeenCalledWith(
+              req.params.pid,
+              { ...req.fields, slug: "test-product" },
+              { new: true }
+            );
+
+            expect(slugify).toHaveBeenCalledWith(req.fields.name);
+            expect(fs.readFileSync).toHaveBeenCalledWith(
+              req.files.photo.path
+            );
+
+            expect(res.status).toHaveBeenCalledWith(201);
+            expect(res.send).toHaveBeenCalledWith({
+                success: true,
+                message: "Product Updated Successfully",
+                products: mockProducts,
+            })
+        });
+
+        test("Pairwise test 5 - Valid photo, missing name, description, quantity, shipping should return error 500", async () => {
+            const missingFields = ["name", "description", "quantity", "shipping"];
+            req.fields = { ...validProduct };
+            req.files.photo = {
+                size: 999999,
+                path: "test/path",
+                type: "image/jpeg"
+              };
+
+            for (const missingField of missingFields) {
+                req.fields[missingField] = "";
+            }
+
+            await updateProductController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(500);
+        });
+
+        test("Pairwise test 6 - Invalid photo, missing description, category, quantity should return error 500", async () => {
+            const missingFields = ["name", "description", "category", "quantity"];
+            req.fields = { ...validProduct };
+            req.files.photo = {
+                size: 1000000,
+                path: "test/path",
+                type: "image/jpeg"
+              };
+
+            for (const missingField of missingFields) {
+                req.fields[missingField] = "";
+            }
+
+            await updateProductController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(500);
+        });
+
+        test("Pairwise test 7 - Invalid photo, missing name, price, category, quantity, shipping should return error 500", async () => {
+            const missingFields = ["name", "price", "category", "quantity", "shipping"];
+            req.fields = { ...validProduct };
+            req.files.photo = {
+                size: 1000000,
+                path: "test/path",
+                type: "image/jpeg"
+              };
+
+            for (const missingField of missingFields) {
+                req.fields[missingField] = "";
+            }
+
+            await updateProductController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(500);
+        });
+
+        test("Pairwise test 8 - Invalid photo, missing name, description, price should return error 500", async () => {
+            const missingFields = ["name", "description", "price", "quantity", "shipping"];
+            req.fields = { ...validProduct };
+            req.files.photo = {
+                size: 1000000,
+                path: "test/path",
+                type: "image/jpeg"
+              };
+
+            for (const missingField of missingFields) {
+                req.fields[missingField] = "";
+            }
+
+            await updateProductController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(500);
+        });
+
+        test("Pairwise test 9 - Invalid photo, missing shipping should return error 500", async () => {
+            const missingFields = ["shipping"];
+            req.fields = { ...validProduct };
+            req.files.photo = {
+                size: 1000000,
+                path: "test/path",
+                type: "image/jpeg"
+              };
+
+            for (const missingField of missingFields) {
+                req.fields[missingField] = "";
+            }
+
+            await updateProductController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.send).toHaveBeenCalledWith({
+                error: "photo is Required and should be less then 1mb",
+            })
+        });
+
+        test("Valid request with DB error should return error 500", async () => {
+            slugify.mockReturnValue("test-product");
+            const mockPhoto = {
+                photo: {
+                    size: 999999,
+                    path: "./test/img",
+                    type: "image/jpeg",
+                  },
+            }
+
+            const req = {
+              params: {
+                pid: new mongoose.Types.ObjectId(),
+              },
+              fields: { ...validProduct },
+              files: { ...mockPhoto },
+            };
+
+            const mockProducts = {
+                ...validProduct,
+                photo: mockPhoto,
+                save: jest.fn(async () => {
+                    throw new Error("Error updating DB");
+                }),
+            }
+
+            productModel.findByIdAndUpdate.mockImplementation((pid, field, nw) => mockProducts);
+
+            await updateProductController(req, res);
+
+            expect(productModel.findByIdAndUpdate).toHaveBeenCalledWith(
+              req.params.pid,
+              { ...req.fields, slug: "test-product" },
+              { new: true }
+            );
+
+            expect(slugify).toHaveBeenCalledWith(req.fields.name);
+            expect(fs.readFileSync).toHaveBeenCalledWith(
+              req.files.photo.path
+            );
+
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.send).toHaveBeenCalledWith({
+                success: false,
+                error: expect.any(Error),
+                message: "Error in Updating product",
+            })
+        });
+  })
 }
 
 );
