@@ -2,6 +2,8 @@ export default {
   // display name
   displayName: "backend",
 
+  setupFiles: ["<rootDir>/jest.setup.js"], 
+
   // when testing backend
   testEnvironment: "node",
 
