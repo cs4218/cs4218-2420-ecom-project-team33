@@ -37,7 +37,10 @@
 
 /* footer */
 .footer {
+  bottom: 0;
   color: white;
+  width: 100%;
+  min-height: 15vh;
   padding: 20px;
   background: #000000; /* fallback for old browsers */
   background: -webkit-linear-gradient(
@@ -46,7 +49,6 @@
     #000000
   ); /* Chrome 10-25, Safari 5.1-6 */
   background: linear-gradient(to right, #434343, #000000);
-  
 }
 
 .footer a {
