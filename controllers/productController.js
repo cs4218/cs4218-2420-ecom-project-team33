@@ -55,7 +55,7 @@ export const createProductController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      error,
+      error: error,
       message: "Error in creating product",
     });
   }
