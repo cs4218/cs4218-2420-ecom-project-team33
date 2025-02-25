@@ -32,7 +32,8 @@ const CartPage = () => {
       console.log(error);
     }
   };
-  //detele item
+
+  // Delete item
   const removeCartItem = (pid) => {
     try {
       let myCart = [...cart];
@@ -54,6 +55,7 @@ const CartPage = () => {
       console.log(error);
     }
   };
+
   useEffect(() => {
     getToken();
   }, [auth?.token]);
@@ -63,7 +65,7 @@ const CartPage = () => {
     try {
       setLoading(true);
       const { nonce } = await instance.requestPaymentMethod();
-      const { data } = await axios.post("/api/v1/product/braintree/payment", {
+      await axios.post("/api/v1/product/braintree/payment", {
         nonce,
         cart,
       });
@@ -71,34 +73,37 @@ const CartPage = () => {
       localStorage.removeItem("cart");
       setCart([]);
       navigate("/dashboard/user/orders");
-      toast.success("Payment Completed Successfully ");
+      toast.success("Payment Completed Successfully");
     } catch (error) {
       console.log(error);
       setLoading(false);
     }
   };
+
   return (
     <Layout>
-      <div className=" cart-page">
+      <div className="cart-page">
         <div className="row">
           <div className="col-md-12">
-            <h1 className="text-center bg-light p-2 mb-1">
+            <h3 className="text-center bg-light p-2 mb-1">
               {!auth?.user
                 ? "Hello Guest"
                 : `Hello  ${auth?.token && auth?.user?.name}`}
-              <p className="text-center">
-                {cart?.length
-                  ? `You Have ${cart.length} items in your cart ${
-                      auth?.token ? "" : "please login to checkout !"
-                    }`
-                  : " Your Cart Is Empty"}
-              </p>
-            </h1>
+            </h3>
           </div>
         </div>
-        <div className="container ">
-          <div className="row ">
-            <div className="col-md-7  p-0 m-0">
+        <div className="container">
+          <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
+            <div className="col-md-7 p-0 m-0 cart-summary">
+              <h2>Cart Items</h2>
+              <p className="text-center">
+                {cart?.length
+                  ? `You have ${cart.length} item(s) in your cart. ${
+                      auth?.token ? "" : "Please Login To Checkout!"
+                    }`
+                  : "Your Cart Is Empty!"}
+              </p>
+              <hr />
               {cart?.map((p) => (
                 <div className="row card flex-row" key={p._id}>
                   <div className="col-md-4">
@@ -110,9 +115,9 @@ const CartPage = () => {
                       height={"130px"}
                     />
                   </div>
-                  <div className="col-md-4">
+                  <div className="col-md-4 text-start">
                     <p>{p.name}</p>
-                    <p>{p.description.substring(0, 30)}</p>
+                    <p>{p.description.substring(0, 30) + (p.description.length > 30 ? "..." : "")}</p>
                     <p>Price : {p.price}</p>
                   </div>
                   <div className="col-md-4 cart-remove-btn">
@@ -126,34 +131,12 @@ const CartPage = () => {
                 </div>
               ))}
             </div>
-            <div className="col-md-5 cart-summary ">
+            <div className="col-md-4 cart-summary">
               <h2>Cart Summary</h2>
               <p>Total | Checkout | Payment</p>
               <hr />
               <h4>Total : {totalPrice()} </h4>
-              {auth?.user?.address ? (
-                <>
-                  <div className="mb-3">
-                    <h4>Current Address</h4>
-                    <h5>{auth?.user?.address}</h5>
-                    <button
-                      className="btn btn-outline-warning"
-                      onClick={() => navigate("/dashboard/user/profile")}
-                    >
-                      Update Address
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <div className="mb-3">
-                  {auth?.token ? (
-                    <button
-                      className="btn btn-outline-warning"
-                      onClick={() => navigate("/dashboard/user/profile")}
-                    >
-                      Update Address
-                    </button>
-                  ) : (
+              { !auth?.token ? (
                     <button
                       className="btn btn-outline-warning"
                       onClick={() =>
@@ -162,11 +145,18 @@ const CartPage = () => {
                         })
                       }
                     >
-                      Plase Login to checkout
+                      Please Login To Checkout!
                     </button>
-                  )}
-                </div>
-              )}
+                  ) : auth?.user?.address 
+                    ? <>
+                        <div className="mb-3">
+                          <h4>Current Address</h4>
+                          <h5>{auth?.user?.address}</h5>
+                          <button className="btn btn-outline-warning" onClick={() => navigate("/dashboard/user/profile")}>Update Address</button>
+                        </div>
+                      </> 
+                    : <></>
+              }
               <div className="mt-2">
                 {!clientToken || !auth?.token || !cart?.length ? (
                   ""

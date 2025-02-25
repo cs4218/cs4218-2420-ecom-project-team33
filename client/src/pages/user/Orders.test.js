@@ -5,6 +5,7 @@ import '@testing-library/jest-dom/extend-expect';
 import { useAuth } from "../../context/auth";
 import axios from "axios";
 import { GAMING_MOUSE, STANDING_DESK, OFFICE_CHAIR } from "../../mocks/search";
+import moment from "moment";
 
 // Mock axios
 jest.mock("axios");
@@ -56,7 +57,7 @@ describe("Orders Page", () => {
     await waitFor(() => expect(getByText(OFFICE_CHAIR.description.substring(0, 30))).toBeInTheDocument());
     await waitFor(() => expect(getByText(`Price : ${OFFICE_CHAIR.price}`)).toBeInTheDocument());
 
-    await waitFor(() => expect(getByText("20 days ago")).toBeInTheDocument());
+    await waitFor(() => expect(getByText(moment("2025-02-04T13:42:16.741Z").fromNow())).toBeInTheDocument());
     await waitFor(() => expect(getByText("Success")).toBeInTheDocument());
     await waitFor(() => expect(getByText("2")).toBeInTheDocument());
     await waitFor(() => expect(getByText("Processed")).toBeInTheDocument());
@@ -82,7 +83,7 @@ describe("Orders Page", () => {
     await waitFor(() => expect(getByText(STANDING_DESK.description.substring(0, 30))).toBeInTheDocument());
     await waitFor(() => expect(getByText(`Price : ${STANDING_DESK.price}`)).toBeInTheDocument());
 
-    await waitFor(() => expect(getByText("20 days ago")).toBeInTheDocument());
+    await waitFor(() => expect(getByText(moment("2025-02-04T13:42:16.741Z").fromNow())).toBeInTheDocument());
     await waitFor(() => expect(getByText("Failed")).toBeInTheDocument());
     await waitFor(() => expect(getAllByText("1")).toHaveLength(2));
     await waitFor(() => expect(getByText("Not Processed")).toBeInTheDocument());
