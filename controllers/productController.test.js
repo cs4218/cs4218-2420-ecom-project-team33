@@ -5,7 +5,8 @@ import {
     deleteProductController,
     updateProductController,
     productPhotoController,
-    productFiltersController
+    productFiltersController,
+    productCountController
  } from "../controllers/productController";
 
  import { beforeAll, beforeEach, describe, jest, test } from "@jest/globals";
@@ -623,7 +624,7 @@ describe("Product Controller tests", () => {
     });
   })
 
-  describe('productFiltersController', () => {
+  describe('productFiltersController tests', () => {
     let req, res;
 
     beforeEach(() => {
@@ -701,4 +702,54 @@ describe("Product Controller tests", () => {
       });
     });
   })
+
+  describe('productCountController tests', () => {
+    let req, res;
+  
+    beforeEach(() => {
+      jest.clearAllMocks();
+  
+      req = {};
+  
+      res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+    });
+  
+    test('Should return the total count of products with status 200', async () => {
+      const totalProducts = 42;
+      
+      productModel.find.mockReturnValue({
+        estimatedDocumentCount: jest.fn().mockResolvedValue(totalProducts)
+      });
+  
+      await productCountController(req, res);
+  
+      expect(productModel.find).toHaveBeenCalledWith({});
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        total: totalProducts
+      });
+    });
+  
+    test('Should return status 400 when database query fails', async () => {
+      const dbError = new Error('Database connection error');
+      
+      productModel.find.mockReturnValue({
+        estimatedDocumentCount: jest.fn().mockRejectedValue(dbError)
+      });
+  
+      await productCountController(req, res);
+  
+      expect(productModel.find).toHaveBeenCalledWith({});
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({
+        message: "Error in product count",
+        error: dbError,
+        success: false
+      });
+    });
+  });
 });
