@@ -3,10 +3,11 @@ import {
     getProductController,
     getSingleProductController,
     deleteProductController,
-    updateProductController
+    updateProductController,
+    productPhotoController
  } from "../controllers/productController";
 
- import { beforeAll, beforeEach, jest } from "@jest/globals";
+ import { beforeAll, beforeEach, describe, jest, test } from "@jest/globals";
  import productModel from "../models/productModel.js";
  import fs from "fs";
  import slugify from "slugify";
@@ -19,6 +20,7 @@ import {
  beforeAll(() => {
    productModel.findByIdAndDelete = jest.fn();
    productModel.findByIdAndUpdate = jest.fn();
+   productModel.findById = jest.fn();
    productModel.findOne = jest.fn();
    productModel.find = jest.fn();
  });
@@ -273,7 +275,7 @@ describe("Product Controller tests", () => {
         })
       });
     
-      test("Should return error with status 600 for non-existent PID", async () => {
+      test("Should return error with status 500 for non-existent PID", async () => {
         req = {
             params: {
                 pid: new mongoose.Types.ObjectId(),
@@ -515,11 +517,6 @@ describe("Product Controller tests", () => {
               { new: true }
             );
 
-            // expect(slugify).toHaveBeenCalledWith(req.fields.name);
-            // expect(fs.readFileSync).toHaveBeenCalledWith(
-            //   req.files.photo.path
-            // );
-
             expect(res.status).toHaveBeenCalledWith(500);
             expect(res.send).toHaveBeenCalledWith({
                 success: false,
@@ -528,4 +525,100 @@ describe("Product Controller tests", () => {
             })
         });
   });
+
+  describe("productPhotoController tests", () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+  
+      req = {
+        params: {
+          pid: new mongoose.Types.ObjectId(),
+        }
+      };
+  
+      res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn(),
+        set: jest.fn().mockReturnThis(),
+      };
+    });
+
+    test("Should get photo successfully with valid photot", async () => {
+      const mockPhotoData = Buffer.from("mock photo data");
+      const mockProduct = {
+        photo: {
+          data: mockPhotoData,
+          contentType: "image/jpeg"
+        }
+      };
+  
+      productModel.findById.mockReturnValue({
+        select: jest.fn().mockResolvedValue(mockProduct)
+      });
+   
+      await productPhotoController(req, res);
+
+      expect(productModel.findById).toHaveBeenCalledWith(req.params.pid);
+      expect(res.set).toHaveBeenCalledWith("Content-type", "image/jpeg");
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith(mockPhotoData);
+    });
+
+    test('should return 404 when product is not found', async () => {
+      productModel.findById.mockReturnValue({
+        select: jest.fn().mockResolvedValue(null)
+      });
+  
+      await productPhotoController(req, res);
+  
+      expect(productModel.findById).toHaveBeenCalledWith(req.params.pid);
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: 'Product not found'
+      });
+      expect(res.set).not.toHaveBeenCalled();
+    });
+
+    test('should return 404 when product has no photo data', async () => {
+      const mockProduct = {
+        _id: req.params.pid,
+        photo: {
+          contentType: 'image/jpeg'
+        }
+      };
+  
+      productModel.findById.mockReturnValue({
+        select: jest.fn().mockResolvedValue(mockProduct)
+      });
+  
+      await productPhotoController(req, res);
+  
+      expect(productModel.findById).toHaveBeenCalledWith(req.params.pid);
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: 'No photo found for this product'
+      });
+      expect(res.set).not.toHaveBeenCalled();
+    });
+
+    test('should return 500 when database query fails', async () => {
+      const dbError = new Error('Database connection error');
+      productModel.findById.mockReturnValue({
+        select: jest.fn().mockRejectedValue(dbError)
+      });
+  
+      await productPhotoController(req, res);
+  
+      expect(productModel.findById).toHaveBeenCalledWith(req.params.pid);
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: 'Error while getting photo',
+        error: dbError
+      });
+      expect(res.set).not.toHaveBeenCalled();
+    });
+  })
 });
