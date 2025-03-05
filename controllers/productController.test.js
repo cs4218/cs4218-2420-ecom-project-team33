@@ -4,7 +4,8 @@ import {
     getSingleProductController,
     deleteProductController,
     updateProductController,
-    productPhotoController
+    productPhotoController,
+    productFiltersController
  } from "../controllers/productController";
 
  import { beforeAll, beforeEach, describe, jest, test } from "@jest/globals";
@@ -619,6 +620,85 @@ describe("Product Controller tests", () => {
         error: dbError
       });
       expect(res.set).not.toHaveBeenCalled();
+    });
+  })
+
+  describe('productFiltersController', () => {
+    let req, res;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+  
+      req = {
+        body: {
+          checked: [],
+          radio: []
+        }
+      };
+  
+      res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+    });
+
+    test('Should return all products when no filters are applied', async () => {
+      const mockProducts = [
+        { _id: 'product1', name: 'Product 1', price: 100 },
+        { _id: 'product2', name: 'Product 2', price: 200 }
+      ];
+  
+      productModel.find.mockResolvedValue(mockProducts);
+  
+      await productFiltersController(req, res);
+  
+      expect(productModel.find).toHaveBeenCalledWith({});
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        products: mockProducts
+      });
+    });
+  
+    test('Should filter products by both category and price range when filters are applied', async () => {
+      const mockCategories = ['category1', 'category2'];
+      const priceRange = [100, 500];
+      const mockProducts = [
+        { _id: 'product1', name: 'Product 1', category: 'category1', price: 200 },
+        { _id: 'product2', name: 'Product 2', category: 'category2', price: 300 }
+      ];
+  
+      req.body.checked = mockCategories;
+      req.body.radio = priceRange;
+  
+      productModel.find.mockResolvedValue(mockProducts);
+  
+      await productFiltersController(req, res);
+  
+      expect(productModel.find).toHaveBeenCalledWith({
+        category: mockCategories,
+        price: { $gte: priceRange[0], $lte: priceRange[1] }
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        products: mockProducts
+      });
+    });
+  
+    test('Should handle database errors and return a 400 status', async () => {
+      const dbError = new Error('Database error');
+      productModel.find.mockRejectedValue(dbError);
+  
+      await productFiltersController(req, res);
+  
+      expect(productModel.find).toHaveBeenCalledWith({});
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Error WHile Filtering Products",
+        error: dbError
+      });
     });
   })
 });
