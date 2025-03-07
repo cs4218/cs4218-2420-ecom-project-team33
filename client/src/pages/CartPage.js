@@ -165,15 +165,11 @@ const CartPage = () => {
                     <DropIn
                       options={{
                         authorization: clientToken,
-                        paypal: {
-                          flow: "vault",
-                        },
                       }}
                       onInstance={(instance) => setInstance(instance)}
                     />
-
                     <button
-                      className="btn btn-primary"
+                      className="btn btn-primary mb-2"
                       onClick={handlePayment}
                       disabled={loading || !instance || !auth?.user?.address}
                     >
