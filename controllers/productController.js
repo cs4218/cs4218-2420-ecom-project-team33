@@ -370,6 +370,11 @@ export const braintreeTokenController = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Error generating Braintree token",
+      error
+    });
   }
 };
 
@@ -404,5 +409,10 @@ export const brainTreePaymentController = async (req, res) => {
     );
   } catch (error) {
     console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Error processing payment",
+      error
+    });
   }
 };
