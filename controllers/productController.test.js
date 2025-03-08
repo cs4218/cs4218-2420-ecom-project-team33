@@ -9,17 +9,19 @@ import {
     productCountController,
     productListController,
     searchProductController,
-    relatedProductController
+    relatedProductController,
+    productCategoryController
  } from "../controllers/productController";
 
  import { beforeAll, beforeEach, describe, jest, test } from "@jest/globals";
  import productModel from "../models/productModel.js";
+ import categoryModel from '../models/categoryModel.js';
  import fs from "fs";
  import slugify from "slugify";
  import mongoose from "mongoose";
  
-//  jest.mock("fs");
  jest.mock("../models/productModel");
+ jest.mock("../models/categoryModel");
  jest.mock("slugify");
  
  beforeAll(() => {
@@ -28,6 +30,7 @@ import {
    productModel.findById = jest.fn();
    productModel.findOne = jest.fn();
    productModel.find = jest.fn();
+   categoryModel.findOne = jest.fn();
  });
  
 jest.mock("braintree", () => ({
@@ -1009,6 +1012,114 @@ describe("Product Controller tests", () => {
         success: false,
         message: "error while getting related product",
         error: dbError
+      });
+    });
+  });
+
+  describe('Product Category Controller', () => {
+    let req, res;
+  
+    beforeEach(() => {
+      jest.clearAllMocks();
+  
+      req = {
+        params: {
+          slug: 'test-category'
+        }
+      };
+  
+      res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+    });
+  
+    test('Should return category and its products successfully', async () => {
+      const mockCategory = {
+        _id: new mongoose.Types.ObjectId(),
+        name: 'Test Category',
+        slug: 'test-category'
+      };
+      
+      const mockProducts = [
+        { _id: 'product1', name: 'Product 1', category: mockCategory._id },
+        { _id: 'product2', name: 'Product 2', category: mockCategory._id }
+      ];
+  
+      categoryModel.findOne.mockResolvedValue(mockCategory);
+      productModel.find.mockReturnValue({
+        populate: jest.fn().mockResolvedValue(mockProducts)
+      });
+
+      await productCategoryController(req, res);
+  
+      expect(categoryModel.findOne).toHaveBeenCalledWith({ slug: 'test-category' });
+      expect(productModel.find).toHaveBeenCalledWith({ category: mockCategory });
+      expect(productModel.find().populate).toHaveBeenCalledWith('category');
+      
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        category: mockCategory,
+        products: mockProducts
+      });
+    });
+  
+    test('Should handle case when category is not found', async () => {
+      categoryModel.findOne.mockResolvedValue(null);
+  
+      await productCategoryController(req, res);
+  
+      expect(categoryModel.findOne).toHaveBeenCalledWith({ slug: 'test-category' });
+      expect(productModel.find).toHaveBeenCalledWith({ category: null });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        category: null,
+        products: expect.any(Array)
+      });
+    });
+  
+    test('Should handle empty products array when no products in category', async () => {
+      const mockCategory = {
+        _id: new mongoose.Types.ObjectId(),
+        name: 'Test Category',
+        slug: 'test-category'
+      };
+      
+      const mockProducts = []; 
+  
+      categoryModel.findOne.mockResolvedValue(mockCategory);
+      productModel.find.mockReturnValue({
+        populate: jest.fn().mockResolvedValue(mockProducts)
+      });
+  
+      await productCategoryController(req, res);
+  
+      expect(categoryModel.findOne).toHaveBeenCalledWith({ slug: 'test-category' });
+      expect(productModel.find).toHaveBeenCalledWith({ category: mockCategory });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        category: mockCategory,
+        products: []
+      });
+    });
+  
+    test('Should handle database error when finding category', async () => {
+      const dbError = new Error('Database error in categoryModel');
+      
+      categoryModel.findOne.mockRejectedValue(dbError);
+  
+      await productCategoryController(req, res);
+  
+      expect(categoryModel.findOne).toHaveBeenCalledWith({ slug: 'test-category' });
+      expect(productModel.find).not.toHaveBeenCalled(); 
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        error: dbError,
+        message: "Error While Getting products"
       });
     });
   });
