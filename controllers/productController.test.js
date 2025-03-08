@@ -8,7 +8,8 @@ import {
     productFiltersController,
     productCountController,
     productListController,
-    searchProductController
+    searchProductController,
+    relatedProductController
  } from "../controllers/productController";
 
  import { beforeAll, beforeEach, describe, jest, test } from "@jest/globals";
@@ -911,5 +912,104 @@ describe("Product Controller tests", () => {
     });
   });
 
+  describe('relatedProductController tests', () => {
+    let req, res;
   
+    beforeEach(() => {
+      jest.clearAllMocks();
+  
+      req = {
+        params: {
+          pid: new mongoose.Types.ObjectId().toString(),
+          cid: new mongoose.Types.ObjectId().toString()
+        }
+      };
+  
+      res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+    });
+  
+    test('Should return status 200 and related products with correct inputs', async () => {
+      const mockProducts = [
+        { _id: 'product1', name: 'Related Product 1', category: req.params.cid },
+        { _id: 'product2', name: 'Related Product 2', category: req.params.cid },
+        { _id: 'product3', name: 'Related Product 3', category: req.params.cid }
+      ];
+  
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        populate: jest.fn().mockResolvedValue(mockProducts)
+      });
+  
+      await relatedProductController(req, res);
+  
+      expect(productModel.find).toHaveBeenCalledWith({
+        category: req.params.cid,
+        _id: { $ne: req.params.pid }
+      });
+      expect(productModel.find().select).toHaveBeenCalledWith('-photo');
+      expect(productModel.find().limit).toHaveBeenCalledWith(3);
+      expect(productModel.find().populate).toHaveBeenCalledWith('category');
+      
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        products: mockProducts
+      });
+    });
+  
+    test('Should return error 400 for empty pid parameter', async () => {
+      req.params = {
+        pid: '',
+        cid: new mongoose.Types.ObjectId().toString()
+      };
+  
+      await relatedProductController(req, res);
+  
+      expect(productModel.find).not.toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Product ID is required"
+      });
+    });
+  
+    test('Should return error 400 for empty cid parameter', async () => {
+      req.params = {
+        pid: new mongoose.Types.ObjectId().toString(),
+        cid: ''
+      };
+  
+      await relatedProductController(req, res);
+  
+      expect(productModel.find).not.toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Category ID is required"
+      });
+    });
+  
+    test('Should return error 400 for db error', async () => {
+      const dbError = new Error('Database connection failed');
+      
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        populate: jest.fn().mockRejectedValue(dbError)
+      });
+  
+      await relatedProductController(req, res);
+  
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "error while getting related product",
+        error: dbError
+      });
+    });
+  });
 });
