@@ -385,10 +385,6 @@ describe("Product Controller tests", () => {
               { new: true }
             );
 
-            // expect(fs.readFileSync).toHaveBeenCalledWith(
-            //   req.files.photo.path
-            // );
-
             expect(res.status).toHaveBeenCalledWith(201);
             expect(res.send).toHaveBeenCalledWith({
                 success: true,
@@ -488,6 +484,32 @@ describe("Product Controller tests", () => {
             expect(res.send).toHaveBeenCalledWith({
                 error: "photo is Required and should be less then 1mb",
             })
+        });
+
+        test("Missing Price should return error 500", async () => {
+          const missingFields = ["category"];
+          req.fields = { ...validProduct };
+
+          for (const missingField of missingFields) {
+              req.fields[missingField] = "";
+          }
+
+          await updateProductController(req, res);
+
+          expect(res.status).toHaveBeenCalledWith(500);
+        });
+
+        test("Missing Quantity should return error 500", async () => {
+          const missingFields = ["quantity"];
+          req.fields = { ...validProduct };
+
+          for (const missingField of missingFields) {
+              req.fields[missingField] = "";
+          }
+
+          await updateProductController(req, res);
+
+          expect(res.status).toHaveBeenCalledWith(500);
         });
 
         test("Valid request with DB error should return error 500", async () => {
