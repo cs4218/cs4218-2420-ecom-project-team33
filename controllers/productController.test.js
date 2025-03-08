@@ -7,7 +7,8 @@ import {
     productPhotoController,
     productFiltersController,
     productCountController,
-    productListController
+    productListController,
+    searchProductController
  } from "../controllers/productController";
 
  import { beforeAll, beforeEach, describe, jest, test } from "@jest/globals";
@@ -844,6 +845,67 @@ describe("Product Controller tests", () => {
       expect(res.send).toHaveBeenCalledWith({
         success: false,
         message: "error in per page ctrl",
+        error: dbError
+      });
+    });
+  });
+
+  describe('searchProductController tests', () => {
+    let req, res;
+  
+    beforeEach(() => {
+      jest.clearAllMocks();
+  
+      req = {
+        params: {}
+      };
+  
+      res = {
+        json: jest.fn(),
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+    });
+  
+    test('should successfully return correct product with valid keyword', async () => {
+      req.params.keyword = 'shirt';
+      
+      const mockProducts = [
+        { _id: 'product1', name: 'T-shirt', description: 'A cotton t-shirt' }
+      ];
+  
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockResolvedValue(mockProducts)
+      });
+  
+      await searchProductController(req, res);
+  
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(mockProducts);
+    });
+  
+  
+    test('Should return status 400 with db error', async () => {
+      req.params.keyword = 'shirt';
+      
+      const dbError = new Error('MongoDB connection failed');
+      
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockRejectedValue(dbError)
+      });
+    
+      await searchProductController(req, res);
+    
+      expect(productModel.find).toHaveBeenCalledWith({
+        $or: [
+          { name: { $regex: 'shirt', $options: 'i' } },
+          { description: { $regex: 'shirt', $options: 'i' } }
+        ]
+      });
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Error In Search Product API",
         error: dbError
       });
     });
