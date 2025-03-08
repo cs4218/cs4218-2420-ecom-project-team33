@@ -6,7 +6,8 @@ import {
     updateProductController,
     productPhotoController,
     productFiltersController,
-    productCountController
+    productCountController,
+    productListController
  } from "../controllers/productController";
 
  import { beforeAll, beforeEach, describe, jest, test } from "@jest/globals";
@@ -749,6 +750,101 @@ describe("Product Controller tests", () => {
         message: "Error in product count",
         error: dbError,
         success: false
+      });
+    });
+  });
+
+  describe('productListController tests', () => {
+    let req, res;
+  
+    beforeEach(() => {
+      jest.clearAllMocks();
+  
+      req = {
+        params: {}
+      };
+  
+      res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+    });
+  
+    test('Should return first page of products when no page is specified', async () => {
+      const mockProducts = [
+        { _id: 'product1', name: 'Product 1' },
+        { _id: 'product2', name: 'Product 2' },
+        { _id: 'product3', name: 'Product 3' },
+        { _id: 'product4', name: 'Product 4' },
+        { _id: 'product5', name: 'Product 5' },
+        { _id: 'product6', name: 'Product 6' }
+      ];
+  
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockResolvedValue(mockProducts)
+      });
+  
+      await productListController(req, res);
+  
+      expect(productModel.find).toHaveBeenCalledWith({});
+      expect(productModel.find().select).toHaveBeenCalledWith('-photo');
+      expect(productModel.find().skip).toHaveBeenCalledWith(0); // (1-1) * 6 = 0
+      expect(productModel.find().limit).toHaveBeenCalledWith(6);
+      expect(productModel.find().sort).toHaveBeenCalledWith({ createdAt: -1 });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        products: mockProducts
+      });
+    });
+  
+  
+    test('Should handle empty result set correctly', async () => {
+      req.params.page = '10';
+      const mockProducts = [];
+  
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockResolvedValue(mockProducts)
+      });
+  
+      await productListController(req, res);
+  
+      expect(productModel.find).toHaveBeenCalledWith({});
+      expect(productModel.find().select).toHaveBeenCalledWith('-photo');
+      expect(productModel.find().skip).toHaveBeenCalledWith(54);
+      expect(productModel.find().limit).toHaveBeenCalledWith(6);
+      expect(productModel.find().sort).toHaveBeenCalledWith({ createdAt: -1 });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        products: []
+      });
+    });
+  
+    test('Should return error 400 with database error', async () => {
+      const dbError = new Error('Database error');
+      
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockRejectedValue(dbError)
+      });
+  
+      await productListController(req, res);
+  
+      expect(productModel.find).toHaveBeenCalledWith({});
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "error in per page ctrl",
+        error: dbError
       });
     });
   });
