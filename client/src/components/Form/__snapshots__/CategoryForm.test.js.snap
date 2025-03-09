@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CategoryForm Component matches snapshot 1`] = `
+<DocumentFragment>
+  <form>
+    <div
+      class="mb-3"
+    >
+      <input
+        class="form-control"
+        placeholder="Enter new category"
+        type="text"
+        value=""
+      />
+    </div>
+    <button
+      class="btn btn-primary"
+      type="submit"
+    >
+      Submit
+    </button>
+  </form>
+</DocumentFragment>
+`;

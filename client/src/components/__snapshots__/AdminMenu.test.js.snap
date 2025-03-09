@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AdminMenu Component matches snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="text-center"
+  >
+    <div
+      class="list-group dashboard-menu"
+    >
+      <h4>
+        Admin Panel
+      </h4>
+      <a
+        class="list-group-item list-group-item-action"
+        href="/dashboard/admin/create-category"
+      >
+        Create Category
+      </a>
+      <a
+        class="list-group-item list-group-item-action"
+        href="/dashboard/admin/create-product"
+      >
+        Create Product
+      </a>
+      <a
+        class="list-group-item list-group-item-action"
+        href="/dashboard/admin/products"
+      >
+        Products
+      </a>
+      <a
+        class="list-group-item list-group-item-action"
+        href="/dashboard/admin/orders"
+      >
+        Orders
+      </a>
+    </div>
+  </div>
+</DocumentFragment>
+`;
