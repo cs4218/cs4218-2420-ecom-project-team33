@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "ecommerce rest api",
   "main": "server.js",
-  "type": "module",
   "scripts": {
     "start": "node server.js",
     "server": "nodemon server.js",
@@ -49,4 +48,5 @@
     "jest-environment-jsdom": "^29.7.0",
     "sonarqube-scanner": "^3.3.0"
   }
+
 }
