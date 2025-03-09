@@ -322,7 +322,7 @@ describe("Forgot Password Controller Test", () => {
 
   test("Successful password reset with status code 200", async () => {
     req.body = {email: "cs4218@test.com", answer: "Football", newPassword: "password124"};
-    //userModel.findOne = jest.fn().mockResolvedValue(req.body);
+    userModel.findOne = jest.fn().mockResolvedValue(req.body);
     const hashedPassword = "hashed_password124";
 
     userModel.findByIdAndUpdate = jest.fn().mockResolvedValue({ ...req.body, password: hashedPassword});
@@ -366,8 +366,8 @@ describe("Test Controller test", () => {
   });
 
   test("Check for Protected Routes response", async () => {
-    testController(req, res);
-    expect(res.status).toHaveBeenCalledWith("Protected Routes");
+    await testController(req, res);
+    expect(res.send).toHaveBeenCalledWith("Protected Routes");
   });
 
 });
