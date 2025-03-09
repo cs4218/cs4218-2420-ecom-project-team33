@@ -7,4 +7,3 @@ coverage/
 /playwright/.cache/
 .env
 sonar-project.properties
-report.json
