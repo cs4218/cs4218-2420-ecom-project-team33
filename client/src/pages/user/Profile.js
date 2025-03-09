@@ -29,12 +29,11 @@ const Profile = () => {
     try {
       const { data } = await axios.put("/api/v1/auth/profile", {
         name,
-        email,
         password,
         phone,
         address,
       });
-      if (data?.errro) {
+      if (data?.error) {
         toast.error(data?.error);
       } else {
         setAuth({ ...auth, user: data?.updatedUser });
@@ -51,76 +50,83 @@ const Profile = () => {
   };
   return (
     <Layout title={"Your Profile"}>
-      <div className="container-fluid m-3 p-3">
+      <div className="m-3 p-3">
         <div className="row">
           <div className="col-md-3">
             <UserMenu />
           </div>
           <div className="col-md-9">
-            <div className="form-container ">
+              <div className="card w-75 p-3">
               <form onSubmit={handleSubmit}>
-                <h4 className="title">USER PROFILE</h4>
                 <div className="mb-3">
+                  <label htmlFor="name" className="form-label">Name</label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="form-control"
-                    id="exampleInputEmail1"
+                    id="name"
+                    data-testid="name"
                     placeholder="Enter Your Name"
                     autoFocus
                   />
                 </div>
                 <div className="mb-3">
+                  <label htmlFor="email" className="form-label">Email</label>
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
                     className="form-control"
-                    id="exampleInputEmail1"
-                    placeholder="Enter Your Email "
+                    id="email"
+                    data-testid="email"
+                    placeholder="Enter Your Email"
                     disabled
                   />
                 </div>
                 <div className="mb-3">
+                  <label htmlFor="password" className="form-label">Password</label>
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="form-control"
-                    id="exampleInputPassword1"
+                    id="password"
+                    data-testid="password"
                     placeholder="Enter Your Password"
                   />
                 </div>
                 <div className="mb-3">
+                  <label htmlFor="phone" className="form-label">Phone</label>
                   <input
                     type="text"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="form-control"
-                    id="exampleInputEmail1"
+                    id="phone"
+                    data-testid="phone"
                     placeholder="Enter Your Phone"
                   />
                 </div>
                 <div className="mb-3">
+                  <label htmlFor="address" className="form-label">Address</label>
                   <input
                     type="text"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     className="form-control"
-                    id="exampleInputEmail1"
+                    id="address"
+                    data-testid="address"
                     placeholder="Enter Your Address"
                   />
                 </div>
-
                 <button type="submit" className="btn btn-primary">
-                  UPDATE
+                  Update
                 </button>
               </form>
+              </div>
             </div>
           </div>
         </div>
-      </div>
     </Layout>
   );
 };

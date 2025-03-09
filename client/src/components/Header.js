@@ -7,10 +7,12 @@ import useCategory from "../hooks/useCategory";
 import { useCart } from "../context/cart";
 import { Badge } from "antd";
 import "../styles/Header.css";
+
 const Header = () => {
   const [auth, setAuth] = useAuth();
   const [cart] = useCart();
   const categories = useCategory();
+  
   const handleLogout = () => {
     setAuth({
       ...auth,
@@ -20,6 +22,7 @@ const Header = () => {
     localStorage.removeItem("auth");
     toast.success("Logout Successfully");
   };
+
   return (
     <>
       <nav className="navbar navbar-expand-lg bg-body-tertiary">
@@ -42,26 +45,27 @@ const Header = () => {
             <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
               <SearchInput />
               <li className="nav-item">
-                <NavLink to="/" className="nav-link ">
+                <NavLink to="/" className="nav-link">
                   Home
                 </NavLink>
               </li>
               <li className="nav-item dropdown">
                 <Link
+                  data-testid="category-button"
                   className="nav-link dropdown-toggle"
                   to={"/categories"}
                   data-bs-toggle="dropdown"
                 >
                   Categories
                 </Link>
-                <ul className="dropdown-menu">
+                <ul className="dropdown-menu" data-testid="category-dropdown">
                   <li>
                     <Link className="dropdown-item" to={"/categories"}>
                       All Categories
                     </Link>
                   </li>
                   {categories?.map((c) => (
-                    <li>
+                    <li key={c._id}>
                       <Link
                         className="dropdown-item"
                         to={`/category/${c.slug}`}
@@ -98,7 +102,7 @@ const Header = () => {
                     >
                       {auth?.user?.name}
                     </NavLink>
-                    <ul className="dropdown-menu">
+                    <ul className="dropdown-menu" data-testid="user-dropdown">
                       <li>
                         <NavLink
                           to={`/dashboard/${
@@ -123,11 +127,12 @@ const Header = () => {
                 </>
               )}
               <li className="nav-item">
-                <Badge count={cart?.length} showZero>
+                <div style={{ display: "flex", flexDirection: "row", color: "black"}}>
                   <NavLink to="/cart" className="nav-link">
                     Cart
                   </NavLink>
-                </Badge>
+                  <Badge style={{ marginLeft: "-15px" }} count={(cart ?? []).length} showZero />
+                </div>                  
               </li>
             </ul>
           </div>
