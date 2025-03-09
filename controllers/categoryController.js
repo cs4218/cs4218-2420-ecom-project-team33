@@ -124,7 +124,7 @@ export const singleCategoryController = async (req, res) => {
       category,
     });
   } catch (error) {
-    console.error(error);
+    console.log(error);
     res.status(500).send({
       success: false,
       error: error.message,
