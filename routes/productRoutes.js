@@ -12,7 +12,6 @@ import {
   productListController,
   productPhotoController,
   relatedProductController,
-  relatedProductController,
   searchProductController,
   updateProductController,
 } from "../controllers/productController.js";

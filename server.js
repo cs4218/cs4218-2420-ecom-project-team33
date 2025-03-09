@@ -31,7 +31,7 @@ app.use("/api/v1/product", productRoutes);
 app.get('/', (req,res) => {
     res.send("<h1>Welcome to ecommerce app</h1>");
 });
-
+console.log("PORT: ", process.env.PORT);
 const PORT = process.env.PORT || 6060;
 
 app.listen(PORT, () => {
