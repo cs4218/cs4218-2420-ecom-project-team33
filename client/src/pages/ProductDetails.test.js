@@ -4,9 +4,12 @@ import ProductDetails from "./ProductDetails";
 import "@testing-library/jest-dom";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+
 
 // Mock all dependencies
 jest.mock("axios");
+jest.mock("react-hot-toast");
 jest.mock("react-router-dom", () => ({
   useParams: jest.fn(),
   useNavigate: jest.fn(),
@@ -14,6 +17,9 @@ jest.mock("react-router-dom", () => ({
 jest.mock("./../components/Layout", () =>
   jest.fn(({ children }) => <div>{children}</div>)
 );
+jest.mock('../context/cart', () => ({
+  useCart: jest.fn(() => [[], jest.fn()]) // Mock useCart hook to return null state and a mock function
+}));
 
 describe("ProductDetails Component", () => {
   let mockNavigate;
