@@ -13,6 +13,7 @@
     "test": "npm run test:frontend && npm run test:backend",
     "test:frontend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.frontend.config.js",
     "test:backend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.backend.config.js",
+    "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.integration.config.js",
     "ci:frontend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.frontend.config.js --ci --json --coverage --testLocationInResults --outputFile=client/report.json",
     "ci:backend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.backend.config.js --ci --json --coverage --testLocationInResults --outputFile=report.json"
   },
@@ -25,12 +26,14 @@
     "colors": "^1.4.0",
     "concurrently": "^8.2.2",
     "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
     "date-fns": "^3.3.1",
     "dotenv": "^16.4.1",
     "express": "^4.18.2",
     "express-formidable": "^1.2.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.3.0",
+    "mongodb-memory-server": "^10.1.4",
     "mongoose": "^8.1.2",
     "morgan": "^1.10.0",
     "nodemon": "^3.0.3",
@@ -49,5 +52,4 @@
     "jest-environment-jsdom": "^29.7.0",
     "sonarqube-scanner": "^3.3.0"
   }
-
 }

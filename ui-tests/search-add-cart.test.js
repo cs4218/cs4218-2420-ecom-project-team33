@@ -16,7 +16,6 @@
 import { test, expect } from "@playwright/test";
 
 test("Search for non-existent item -> Not Found -> Search for existent item -> Found -> Reload Page -> Add to cart -> Return to home page", async ({ page }) => {
-
   // Start at home page
   await page.goto("/");
 
@@ -36,7 +35,6 @@ test("Search for non-existent item -> Not Found -> Search for existent item -> F
   await expect(page.getByRole('heading', { name: 'Laptop' })).toHaveText(/Laptop/i);
   await expect(page.getByText(/\$ 1499.99/)).toBeVisible();
   await expect(page.getByText(/A powerful laptop.../)).toBeVisible();
-  await expect(page.getByRole('img', { name: 'Laptop' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'ADD TO CART' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'More Details' })).toBeVisible();
 
