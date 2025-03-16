@@ -25,6 +25,7 @@
     "colors": "^1.4.0",
     "concurrently": "^8.2.2",
     "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
     "date-fns": "^3.3.1",
     "dotenv": "^16.4.1",
     "express": "^4.18.2",
@@ -49,5 +50,4 @@
     "jest-environment-jsdom": "^29.7.0",
     "sonarqube-scanner": "^3.3.0"
   }
-
 }
