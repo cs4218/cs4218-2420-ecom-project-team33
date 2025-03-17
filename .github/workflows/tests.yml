@@ -44,3 +44,6 @@ jobs:
           custom-title: Coverage report for backend
           skip-step: install
           test-script: npm run ci:backend
+      
+      - name: Run integration tests
+        run: npm run test:integration

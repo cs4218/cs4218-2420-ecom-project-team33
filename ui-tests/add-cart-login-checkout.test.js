@@ -58,6 +58,9 @@ test("Add To Cart -> Remove Items From Cart -> Login -> Checkout -> View Order P
   // Navigate to cart page
   await page.getByRole('link', { name: 'Cart' }).click();
 
+  // Wait for page to load
+  await page.waitForLoadState('load');
+
   // Expect following to be present
   await expect(page.getByRole('heading', { name: 'Hello Guest' })).toBeVisible();
 
