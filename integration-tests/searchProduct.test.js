@@ -1,5 +1,5 @@
 import { test, describe } from "@jest/globals";
-import app from "../server";
+import { server, app } from "../server.js";
 import request from "supertest";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
@@ -11,7 +11,7 @@ describe("Search Product Endpoint '/search/:keyword'", () => {
     // Connect to MongoDB in memory and insert test data
     beforeAll(async () => {
       const testDB = await MongoMemoryServer.create();
-      await mongoose.connect(testDB.getUri(), { useNewUrlParser: true, useUnifiedTopology: true });
+      await mongoose.connect(testDB.getUri());
       await mongoose.connection.collection("categories").insertMany(CATEGORIES);
       await mongoose.connection.collection("products").insertMany(PRODUCTS);
     });
@@ -60,6 +60,10 @@ describe("Search Product Endpoint '/search/:keyword'", () => {
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe("Error In Search Product API");
     });
+  });
+
+  afterAll(async () => {
+    server.close();
   });
 
 });
