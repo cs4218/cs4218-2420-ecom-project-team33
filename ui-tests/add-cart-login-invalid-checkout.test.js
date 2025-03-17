@@ -17,7 +17,7 @@ const CC_NUMBER = "4032035400234001";
 const CC_EXPIRY = "06/2029";
 const CC_CVV_INVALID = "35";
 
-const USERNAME = "CS 4218 Test Accounts";
+const USERNAME = "CS 4218 Test Account";
 const ADDRESS = "1 Computing Drive";
 
 const ITEMS = [
