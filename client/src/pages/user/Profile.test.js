@@ -198,4 +198,73 @@ describe("Profile Page", () => {
     expect(toast.error).toHaveBeenCalledWith("Something went wrong");
   });
 
-})
+  // New test for phone validation
+  it("should validate phone number format and prevent submission with invalid phone", async () => {
+    // Mock useAuth hook
+    useAuth.mockReturnValue([{user: { name: "test", email: "test@test.com", address: "school of computing", phone: "12345678", role: 0 }}, jest.fn()]);
+    
+    // Render Profile Page
+    const { getByText, getByTestId, findByText } = render(
+      <MemoryRouter initialEntries={['/dashboard/user/profile']}>
+        <Routes>
+          <Route path='/dashboard/user/profile' element={<Profile />} />
+        </Routes>
+      </MemoryRouter>
+    );
+    
+    // Get phone input field
+    const phoneInput = getByTestId("phone");
+    
+    // Test with non-digit characters
+    fireEvent.change(phoneInput, { target: { value: '123abc456' } });
+    
+    // Should show validation error
+    const nonDigitError = await findByText("Phone number should contain only digits");
+    expect(nonDigitError).toBeInTheDocument();
+    
+    // Test with boundary value 7
+    fireEvent.change(phoneInput, { target: { value: '123457' } });
+    
+    // Should show length validation error
+    const lengthError = await findByText("Phone number should be at least 8 digits");
+    expect(lengthError).toBeInTheDocument();
+    
+    // Click update button while validation error exists
+    fireEvent.click(getByText("Update"));
+    
+    // API call should not be made when validation error exists
+    expect(axios.put).not.toHaveBeenCalled();
+    
+    // Should show toast error with validation message
+    expect(toast.error).toHaveBeenCalledWith("Phone number should be at least 8 digits");
+    
+    // Now fix the phone number to boundary value 8
+    fireEvent.change(phoneInput, { target: { value: '12345678'} });
+    
+    // Validation error should be gone
+    expect(lengthError).not.toBeInTheDocument();
+    
+    // API call should now succeed
+    axios.put.mockResolvedValueOnce({ 
+      data: {
+        success: true, 
+        updatedUser: { 
+          name: 'test', 
+          email: "test@test.com", 
+          address: "school of computing", 
+          phone: "1234567890", 
+          role: 0 
+        }
+      } 
+    });
+    
+    // Click update again
+    fireEvent.click(getByText("Update"));
+    
+    // API call should be made
+    await waitFor(() => expect(axios.put).toHaveBeenCalled());
+    
+    // Success toast should appear
+    expect(toast.success).toHaveBeenCalledWith("Profile Updated Successfully");
+  });
+});
