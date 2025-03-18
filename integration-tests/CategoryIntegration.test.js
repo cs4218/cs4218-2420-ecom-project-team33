@@ -1,10 +1,11 @@
 import request from "supertest";
 import mongoose from "mongoose";
-import app from "../server.js";
+import { server, app } from "../server.js";
 import categoryModel from "../models/categoryModel.js";
 import { createCategoryController } from "../controllers/categoryController.js";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import connectDB from "../config/db.js";
+import { USERS, PRODUCTS, CATEGORIES } from "../test-data/util.js";
 
 const ADMIN_EMAIL = "admin@test.sg";
 const ADMIN_PASSWORD = "admin@test.sg";
@@ -16,6 +17,16 @@ describe("Category API Tests", () => {
   let categorySlug;
   let adminToken;
 
+  beforeAll(async () => {
+    const testDB = await MongoMemoryServer.create();
+    await mongoose.connect(testDB.getUri());
+    await mongoose.connection.collection("users").insertMany(USERS);
+    await mongoose.connection.collection("categories").insertMany(CATEGORIES);
+    await mongoose.connection
+      .collection("products")
+      .insertMany(PRODUCTS.slice(0, 4));
+  });
+
   afterAll(async () => {
     await mongoose.connection.dropDatabase();
     await mongoose.connection.close();
@@ -24,7 +35,7 @@ describe("Category API Tests", () => {
   it("should create a category for an admin user", async () => {
     const loginRes = await request(app)
       .post("/api/v1/auth/login")
-      .send({ email: USER_EMAIL, password: USER_PASSWORD });
+      .send({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD });
 
     adminToken = loginRes.body.token;
     console.log("Response:", JSON.stringify(loginRes.body, null, 2));
@@ -50,159 +61,163 @@ describe("Category API Tests", () => {
     expect(categoryInDb.slug).toBe("new-category");
   });
 
-  // it("Should not be able to create an existing category", async () => {
-  //   const loginRes = await request(app)
-  //     .post("/api/v1/auth/login")
-  //     .send({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD });
+  afterAll(async () => {
+    server.close();
+  });
 
-  //   adminToken = loginRes.body.token;
+  it("Should not be able to create an existing category", async () => {
+    const loginRes = await request(app)
+      .post("/api/v1/auth/login")
+      .send({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD });
 
-  //   const categoryData = { name: "New Category", slug: "new-category" };
+    adminToken = loginRes.body.token;
 
-  //   const res = await request(app)
-  //     .post("/api/v1/category/create-category")
-  //     .set("Authorization", `${adminToken}`)
-  //     .send(categoryData);
+    const categoryData = { name: "New Category", slug: "new-category" };
 
-  //   expect(res.status).toBe(409);
-  //   expect(res.body.success).toBe(false);
-  //   expect(res.body.message).toBe("Category already exists");
-  // });
+    const res = await request(app)
+      .post("/api/v1/category/create-category")
+      .set("Authorization", `${adminToken}`)
+      .send(categoryData);
 
-  // it("should get all categories", async () => {
-  //   const res = await request(app).get("/api/v1/category/get-category");
+    expect(res.status).toBe(409);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("Category already exists");
+  });
 
-  //   expect(res.status).toBe(200);
-  //   expect(res.body.success).toBe(true);
-  //   expect(Array.isArray(res.body.category)).toBe(true);
-  //   expect(res.body.category.length).toBeGreaterThan(0);
-  // });
+  it("should get all categories", async () => {
+    const res = await request(app).get("/api/v1/category/get-category");
 
-  // it("should not allow a non-admin user to create a category", async () => {
-  //   const loginRes = await request(app)
-  //     .post("/api/v1/auth/login")
-  //     .send({ email: USER_EMAIL, password: USER_PASSWORD });
-  //   console.log(JSON.stringify(loginRes.body, null, 2));
-  //   const nonAdminToken = loginRes.body.token;
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(Array.isArray(res.body.category)).toBe(true);
+    expect(res.body.category.length).toBeGreaterThan(0);
+  });
 
-  //   const categoryData = {
-  //     name: "Unauthorized Category",
-  //     slug: "unauthorized-category",
-  //   };
+  it("should not allow a non-admin user to create a category", async () => {
+    const loginRes = await request(app)
+      .post("/api/v1/auth/login")
+      .send({ email: USER_EMAIL, password: USER_PASSWORD });
+    console.log(JSON.stringify(loginRes.body, null, 2));
+    const nonAdminToken = loginRes.body.token;
 
-  //   const res = await request(app)
-  //     .post("/api/v1/category/create-category")
-  //     .set("Authorization", `${nonAdminToken}`)
-  //     .send(categoryData);
+    const categoryData = {
+      name: "Unauthorized Category",
+      slug: "unauthorized-category",
+    };
 
-  //   expect(res.status).toBe(401);
-  //   expect(res.body.success).toBe(false);
-  //   expect(res.body.message).toBe("UnAuthorized Access");
+    const res = await request(app)
+      .post("/api/v1/category/create-category")
+      .set("Authorization", `${nonAdminToken}`)
+      .send(categoryData);
 
-  //   const categoryInDb = await categoryModel.findOne({
-  //     slug: "unauthorized-category",
-  //   });
-  //   expect(categoryInDb).toBeNull();
-  // });
+    expect(res.status).toBe(401);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("UnAuthorized Access");
 
-  // it("should get a single category we just created", async () => {
-  //   const res = await request(app).get(
-  //     `/api/v1/category/single-category/${categorySlug}`
-  //   );
+    const categoryInDb = await categoryModel.findOne({
+      slug: "unauthorized-category",
+    });
+    expect(categoryInDb).toBeNull();
+  });
 
-  //   expect(res.status).toBe(200);
-  //   expect(res.body.success).toBe(true);
-  //   expect(res.body.category).toBeDefined();
-  //   expect(res.body.category.name).toBe("New Category");
-  //   expect(res.body.category.slug).toBe("new-category");
-  // });
+  it("should get a single category we just created", async () => {
+    const res = await request(app).get(
+      `/api/v1/category/single-category/${categorySlug}`
+    );
 
-  // it("should allow a admin user to update a category", async () => {
-  //   const loginRes = await request(app)
-  //     .post("/api/v1/auth/login")
-  //     .send({ email: USER_EMAIL, password: USER_PASSWORD });
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.category).toBeDefined();
+    expect(res.body.category.name).toBe("New Category");
+    expect(res.body.category.slug).toBe("new-category");
+  });
 
-  //   const nonAdminToken = loginRes.body.token;
+  it("should allow a admin user to update a category", async () => {
+    const loginRes = await request(app)
+      .post("/api/v1/auth/login")
+      .send({ email: USER_EMAIL, password: USER_PASSWORD });
 
-  //   const updatedCategoryData = {
-  //     name: "Updated Category Name",
-  //   };
+    const nonAdminToken = loginRes.body.token;
 
-  //   const updateRes = await request(app)
-  //     .put(`/api/v1/category/update-category/${categoryId}`)
-  //     .set("Authorization", `${nonAdminToken}`)
-  //     .send(updatedCategoryData);
+    const updatedCategoryData = {
+      name: "Updated Category Name",
+    };
 
-  //   expect(updateRes.status).toBe(401);
-  //   expect(updateRes.body.success).toBe(false);
-  //   expect(updateRes.body.message).toBe("UnAuthorized Access");
-  // });
+    const updateRes = await request(app)
+      .put(`/api/v1/category/update-category/${categoryId}`)
+      .set("Authorization", `${nonAdminToken}`)
+      .send(updatedCategoryData);
 
-  // it("should allow a admin user to update a category", async () => {
-  //   const loginRes = await request(app)
-  //     .post("/api/v1/auth/login")
-  //     .send({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD });
+    expect(updateRes.status).toBe(401);
+    expect(updateRes.body.success).toBe(false);
+    expect(updateRes.body.message).toBe("UnAuthorized Access");
+  });
 
-  //   adminToken = loginRes.body.token;
+  it("should allow a admin user to update a category", async () => {
+    const loginRes = await request(app)
+      .post("/api/v1/auth/login")
+      .send({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD });
 
-  //   const updatedCategoryData = {
-  //     name: "Updated Category Name",
-  //   };
+    adminToken = loginRes.body.token;
 
-  //   const updateRes = await request(app)
-  //     .put(`/api/v1/category/update-category/${categoryId}`)
-  //     .set("Authorization", `${adminToken}`)
-  //     .send(updatedCategoryData);
+    const updatedCategoryData = {
+      name: "Updated Category Name",
+    };
 
-  //   expect(updateRes.status).toBe(200);
-  //   expect(updateRes.body.success).toBe(true);
-  //   expect(updateRes.body.message).toBe("Category Updated Successfully");
-  //   expect(updateRes.body.category).toBeDefined();
-  //   expect(updateRes.body.category.name).toBe(updatedCategoryData.name);
-  //   expect(updateRes.body.category.slug).toBe("updated-category-name");
+    const updateRes = await request(app)
+      .put(`/api/v1/category/update-category/${categoryId}`)
+      .set("Authorization", `${adminToken}`)
+      .send(updatedCategoryData);
 
-  //   const updatedCategoryInDb = await categoryModel.findById(categoryId);
-  //   expect(updatedCategoryInDb).toBeDefined();
-  //   expect(updatedCategoryInDb.name).toBe(updatedCategoryData.name);
-  //   expect(updatedCategoryInDb.slug).toBe("updated-category-name");
-  // });
+    expect(updateRes.status).toBe(200);
+    expect(updateRes.body.success).toBe(true);
+    expect(updateRes.body.message).toBe("Category Updated Successfully");
+    expect(updateRes.body.category).toBeDefined();
+    expect(updateRes.body.category.name).toBe(updatedCategoryData.name);
+    expect(updateRes.body.category.slug).toBe("updated-category-name");
 
-  // it("should not allow a non-admin user to delete a category", async () => {
-  //   const loginRes = await request(app)
-  //     .post("/api/v1/auth/login")
-  //     .send({ email: USER_EMAIL, password: USER_PASSWORD });
+    const updatedCategoryInDb = await categoryModel.findById(categoryId);
+    expect(updatedCategoryInDb).toBeDefined();
+    expect(updatedCategoryInDb.name).toBe(updatedCategoryData.name);
+    expect(updatedCategoryInDb.slug).toBe("updated-category-name");
+  });
 
-  //   const nonAdminToken = loginRes.body.token;
+  it("should not allow a non-admin user to delete a category", async () => {
+    const loginRes = await request(app)
+      .post("/api/v1/auth/login")
+      .send({ email: USER_EMAIL, password: USER_PASSWORD });
 
-  //   const deleteRes = await request(app)
-  //     .delete(`/api/v1/category/delete-category/${categoryId}`)
-  //     .set("Authorization", `${nonAdminToken}`);
+    const nonAdminToken = loginRes.body.token;
 
-  //   expect(deleteRes.status).toBe(401);
-  //   expect(deleteRes.body.success).toBe(false);
-  //   expect(deleteRes.body.message).toBe("UnAuthorized Access");
+    const deleteRes = await request(app)
+      .delete(`/api/v1/category/delete-category/${categoryId}`)
+      .set("Authorization", `${nonAdminToken}`);
 
-  //   const categoryInDb = await categoryModel.findById(categoryId);
-  //   expect(categoryInDb).not.toBeNull();
-  //   expect(categoryInDb.name).toBe("Updated Category Name");
-  //   expect(categoryInDb.slug).toBe("updated-category-name");
-  // });
+    expect(deleteRes.status).toBe(401);
+    expect(deleteRes.body.success).toBe(false);
+    expect(deleteRes.body.message).toBe("UnAuthorized Access");
 
-  // it("should allow an admin user to delete a category", async () => {
-  //   const loginRes = await request(app)
-  //     .post("/api/v1/auth/login")
-  //     .send({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD });
+    const categoryInDb = await categoryModel.findById(categoryId);
+    expect(categoryInDb).not.toBeNull();
+    expect(categoryInDb.name).toBe("Updated Category Name");
+    expect(categoryInDb.slug).toBe("updated-category-name");
+  });
 
-  //   const nonAdminToken = loginRes.body.token;
+  it("should allow an admin user to delete a category", async () => {
+    const loginRes = await request(app)
+      .post("/api/v1/auth/login")
+      .send({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD });
 
-  //   const deleteRes = await request(app)
-  //     .delete(`/api/v1/category/delete-category/${categoryId}`)
-  //     .set("Authorization", `${nonAdminToken}`);
+    const nonAdminToken = loginRes.body.token;
 
-  //   expect(deleteRes.status).toBe(200);
-  //   expect(deleteRes.body.success).toBe(true);
+    const deleteRes = await request(app)
+      .delete(`/api/v1/category/delete-category/${categoryId}`)
+      .set("Authorization", `${nonAdminToken}`);
 
-  //   const deletedCategory = await categoryModel.findById(categoryId);
-  //   expect(deletedCategory).toBeNull();
-  // });
+    expect(deleteRes.status).toBe(200);
+    expect(deleteRes.body.success).toBe(true);
+
+    const deletedCategory = await categoryModel.findById(categoryId);
+    expect(deletedCategory).toBeNull();
+  });
 });

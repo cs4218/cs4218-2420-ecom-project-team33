@@ -20,7 +20,7 @@ const connectDB = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    await mongoose.connection.collection("users").insertOne(USER);
+    await mongoose.connection.collection("users").insertOne(USERS);
     await mongoose.connection.collection("categories").insertMany(CATEGORIES);
     await mongoose.connection.collection("products").insertMany(PRODUCTS);
     await mongoose.connection.collection("orders").insertOne(ORDERS);
