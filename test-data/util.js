@@ -22,14 +22,10 @@ const USERS = [
     address: "admin@test.sg",
     answer: "admin@test.sg",
     role: 1,
-    createdAt: {
-      $date: "2024-10-25T16:10:25.288Z",
-    },
-    updatedAt: {
-      $date: "2024-10-25T16:10:25.288Z",
-    },
+    createdAt: "2024-10-25T16:10:25.288Z",
+    updatedAt: "2024-10-25T16:10:25.288Z",
     __v: 0,
-  },
+  }
 ];
 
 const CATEGORIES = [

@@ -18,6 +18,7 @@ describe("Search Product Endpoint '/search/:keyword'", () => {
     
     // Close the connection after all tests are done
     afterAll(async () => {
+      await mongoose.connection.dropDatabase();
       await mongoose.connection.close();
     });
     

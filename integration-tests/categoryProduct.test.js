@@ -18,6 +18,7 @@ describe("Product Category Endpoint '/product-category/:slug'", () => {
     
     // Close the connection after all tests are done
     afterAll(async () => {
+      await mongoose.connection.dropDatabase();
       await mongoose.connection.close();
     });
     
