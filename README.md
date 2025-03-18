@@ -1,6 +1,8 @@
-# Milestone 1
+# CS4218 Team 33 AY24/25 Semester 2
 
-## Setting Up Instructions
+## Milestone 1
+
+### Setting Up Instructions
 
 Copy the .env file from the milestone 1 submission and paste it into the root directory.
 
@@ -12,7 +14,7 @@ After successful setup, you can do the following:
 2. `npm run test:backend` to run backend tests.
 3. `npm run test` to run both frontend and backend tests. 
 
-## CI Submission
+### CI Submission
 
 The given link is an example of a job that runs everytime a PR to the main branch is created. 
 
@@ -21,3 +23,13 @@ Example: https://github.com/cs4218/cs4218-2420-ecom-project-team33/actions/runs/
 It also creates a comment on the PR containing the coverage report based on the results of the frontend and backend tests.
 
 Example: https://github.com/cs4218/cs4218-2420-ecom-project-team33/pull/13
+
+## Milestone 2
+
+### UI and Integration Tests
+
+For this milestone, you can do the following:
+
+1. `npm run test:integration` to run the integration tests.
+2. `npx playwright test` to run the UI tests.
+3. `npx playwright test --ui` to run and view the UI tests using the playwright GUI.

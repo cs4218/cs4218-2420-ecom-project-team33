@@ -388,11 +388,27 @@ export const braintreeTokenController = async (req, res) => {
 export const brainTreePaymentController = async (req, res) => {
   try {
     const { nonce, cart } = req.body;
+    
+    if (!cart || cart.length === 0) {
+      return res.status(400).send({
+        success: false,
+        message: "Cart is empty",
+      });
+    }
+
+    if (!nonce) {
+      return res.status(400).send({
+        success: false,
+        message: "Nonce is required",
+      });
+    }
+
     let total = 0;
     cart.map((i) => {
       total += i.price;
     });
-    let newTransaction = gateway.transaction.sale(
+
+    gateway.transaction.sale(
       {
         amount: total,
         paymentMethodNonce: nonce,
@@ -401,16 +417,21 @@ export const brainTreePaymentController = async (req, res) => {
         },
       },
       function (error, result) {
-        if (result) {
-          const order = new orderModel({
-            products: cart,
-            payment: result,
-            buyer: req.user._id,
-          }).save();
-          res.json({ ok: true });
-        } else {
-          res.status(500).send(error);
+        if (!result.success || error) {
+          return res.status(500).json({
+            success: false,
+            message: "Transaction failed",
+            error: result.message,
+          });
         }
+        
+        new orderModel({
+          products: cart,
+          payment: result,
+          buyer: req.user._id,
+        }).save();
+
+        return res.json({ success: true, message: "Payment successful" });
       }
     );
   } catch (error) {
