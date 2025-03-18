@@ -15,9 +15,9 @@
 */
 import { test, expect } from "@playwright/test";
 
-const CC_NUMBER = "4032035400234001";
-const CC_EXPIRY = "06/2029";
-const CC_CVV = "351";
+const CC_NUMBER = "374245455400126";
+const CC_EXPIRY = "05/2026";
+const CC_CVV = "3514";
 
 const ITEMS = [
   {
@@ -59,7 +59,7 @@ test("Add To Cart -> Remove Items From Cart -> Login -> Checkout -> View Order P
   await page.getByRole('link', { name: 'Cart' }).click();
 
   // Expect following to be present
-  await expect(page.getByRole('heading', { name: 'Hello Guest' })).toBeVisible();
+  await page.getByRole('heading', { name: 'Hello Guest' }).waitFor({ state: 'visible' });
 
   // Expect cart page to show current number of items in cart
   await expect(page.getByText('You have 3 item(s) in your cart.')).toBeVisible();
