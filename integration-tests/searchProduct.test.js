@@ -1,49 +1,69 @@
-// import { test, describe } from "@jest/globals";
+import { test, describe } from "@jest/globals";
+import { server, app } from "../server.js";
+import request from "supertest";
+import { MongoMemoryServer } from "mongodb-memory-server";
+import mongoose from "mongoose";
+import { PRODUCTS, CATEGORIES } from "../test-data/util.js";
 
-// const TEST_USER = {
-// name: "CS 4218 Test Account",
-// email: "cs4218@test.com",
-// password: "cs4218@test.com",
-// phone: "81234567",
-// address: "1 Computing Drive",
-// };
+describe("Search Product Endpoint '/search/:keyword'", () => {
 
-// describe("Search Product Endpoint '/search/:keyword'", () => {
+  describe("Database Connected", () => {
+    // Connect to MongoDB in memory and insert test data
+    beforeAll(async () => {
+      const testDB = await MongoMemoryServer.create();
+      await mongoose.connect(testDB.getUri());
+      await mongoose.connection.collection("categories").insertMany(CATEGORIES);
+      await mongoose.connection.collection("products").insertMany(PRODUCTS);
+    });
+    
+    // Close the connection after all tests are done
+    afterAll(async () => {
+      await mongoose.connection.close();
+    });
+    
+    test("should handle valid search request with products available", async () => {
+      // Make a request to the search endpoint
+      const response = await request(app).get("/api/v1/product/search/book");
+      
+      // Expect following
+      expect(response.status).toBe(200);
+      expect(response.body.length).toBeGreaterThan(0);
+      expect(response.body.some(product => product.name.toLowerCase().includes("book") || product.description.toLowerCase().includes("book"))).toBe(true);
+    });
+  
+    test("should handle valid search request with products not available", async () => {
+      // Make a request to the search endpoint
+      const response = await request(app).get("/api/v1/product/search/none");
+      
+      // Expect following
+      expect(response.status).toBe(200);
+      expect(PRODUCTS.some(product => product.name.toLowerCase().includes("none") || product.description.toLowerCase().includes("none"))).toBe(false);
+      expect(response.body.length).toBe(0);
+    });
+  
+    test("should handle invalid requests with empty keyword", async () => {
+      // Make a request to the search endpoint
+      const response = await request(app).get("/api/v1/product/search");
+      
+      // Expect following
+      expect(response.status).toBe(404);
+    });
+  });
 
-//   test("should handle valid request", async () => {
-//     const response = await Search("laptop");
-//     console.log(response);
-//   });
+  describe("Database Disconnected", () => {
+    test("should handle scenario when database is disconnected", async () => {
+      // Make a request to the search endpoint
+      const response = await request(app).get("/api/v1/product/search/book");
+      
+      // Expect following
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toBe("Error In Search Product API");
+    });
+  });
 
-// });
+  afterAll(async () => {
+    server.close();
+  });
 
-// async function Register() {
-//   await POST("http://localhost:6060/api/v1/auth/register", TEST_USER);
-// }
-
-// async function Login() {
-//   return await POST("http://localhost:6060/api/v1/auth/login", { email: TEST_USER.email, password: TEST_USER.password });
-// }
-
-// async function Search(product) {
-//   return await GET(`http://localhost:6060/api/v1/product/search/${product}`);
-// }
-
-// async function POST(endpoint, body) {
-//   return await fetch(endpoint, {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//     },
-//     body: JSON.stringify(body),
-//   }).then(res => res.json());
-// };
-
-// async function GET(endpoint) {
-//   return await fetch(endpoint, {
-//     method: "GET",
-//     headers: {
-//       "Content-Type": "application/json",
-//     },
-//   }).then(res => res.json());
-// };
+});

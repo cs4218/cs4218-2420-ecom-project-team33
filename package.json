@@ -13,7 +13,7 @@
     "test": "npm run test:frontend && npm run test:backend",
     "test:frontend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.frontend.config.js",
     "test:backend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.backend.config.js",
-    "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.integration.config.js",
+    "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.integration.config.js --runInBand --detectOpenHandles --forceExit",
     "ci:frontend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.frontend.config.js --ci --json --coverage --testLocationInResults --outputFile=client/report.json",
     "ci:backend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.backend.config.js --ci --json --coverage --testLocationInResults --outputFile=report.json"
   },

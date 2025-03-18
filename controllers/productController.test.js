@@ -1093,12 +1093,10 @@ describe("Product Controller tests", () => {
       await productCategoryController(req, res);
   
       expect(categoryModel.findOne).toHaveBeenCalledWith({ slug: 'test-category' });
-      expect(productModel.find).toHaveBeenCalledWith({ category: null });
-      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.status).toHaveBeenCalledWith(404);
       expect(res.send).toHaveBeenCalledWith({
-        success: true,
-        category: null,
-        products: expect.any(Array)
+        success: false,
+        message: "Category not found",
       });
     });
   
