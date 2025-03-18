@@ -13,6 +13,8 @@ const Profile = () => {
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  // validation errors
+  const [phoneError, setPhoneError] = useState("");
 
   //get user data
   useEffect(() => {
@@ -23,9 +25,35 @@ const Profile = () => {
     setAddress(address);
   }, [auth?.user]);
 
+  // phone validation handler
+  const handlePhoneChange = (e) => {
+    const phoneInput = e.target.value;
+    
+    // Validate phone number - only digits allowed
+    if (!/^\d*$/.test(phoneInput)) {
+      setPhoneError("Phone number should contain only digits");
+    } 
+    // Check length if not empty
+    else if (phoneInput.length > 0 && phoneInput.length < 8) {
+      setPhoneError("Phone number should be at least 8 digits");
+    } 
+    else {
+      setPhoneError("");
+    }
+    
+    setPhone(phoneInput);
+  };
+
   // form function
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate before submitting
+    if (phoneError) {
+      toast.error(phoneError);
+      return;
+    }
+    
     try {
       const { data } = await axios.put("/api/v1/auth/profile", {
         name,
@@ -100,12 +128,13 @@ const Profile = () => {
                   <input
                     type="text"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="form-control"
+                    onChange={handlePhoneChange}
+                    className={`form-control ${phoneError ? 'is-invalid' : ''}`}
                     id="phone"
                     data-testid="phone"
                     placeholder="Enter Your Phone"
                   />
+                  {phoneError && <div className="invalid-feedback">{phoneError}</div>}
                 </div>
                 <div className="mb-3">
                   <label htmlFor="address" className="form-label">Address</label>
