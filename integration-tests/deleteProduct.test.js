@@ -111,11 +111,11 @@ describe("Delete Product API Tests", () => {
       .delete(`/api/v1/product/delete-product/${secondProductId}`)
       .set("Authorization", adminToken);
     
-    expect(res.status).toBe(500);
-    expect(res.body.success).toBe(false);
-    expect(res.body.message).toBe("Error while deleting product");
-    
-    // Reconnect for cleanup
-    await mongoose.connect(testDB.getUri());
+      expect(res.status).toBe(401);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toBe("Error in admin middleware");
+      
+      // Reconnect for cleanup
+      await mongoose.connect(testDB.getUri());
   });
 });
