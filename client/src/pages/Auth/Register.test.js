@@ -66,8 +66,7 @@ describe('Register Component', () => {
     fireEvent.change(getByPlaceholderText('Enter Your Password'), { target: { value: 'password123' } });
     fireEvent.change(getByPlaceholderText('Enter Your Phone'), { target: { value: '1234567890' } });
     fireEvent.change(getByPlaceholderText('Enter Your Address'), { target: { value: '123 Street' } });
-    fireEvent.change(getByPlaceholderText('Enter Your DOB'), { target: { value: '2000-01-01' } });
-    fireEvent.change(getByPlaceholderText('What is Your Favorite sports'), { target: { value: 'Football' } });
+    fireEvent.change(getByPlaceholderText('What is your favorite sport'), { target: { value: 'Football' } });
 
     fireEvent.click(getByText('REGISTER'));
 
@@ -91,8 +90,7 @@ describe('Register Component', () => {
     fireEvent.change(getByPlaceholderText('Enter Your Password'), { target: { value: 'password123' } });
     fireEvent.change(getByPlaceholderText('Enter Your Phone'), { target: { value: '1234567890' } });
     fireEvent.change(getByPlaceholderText('Enter Your Address'), { target: { value: '123 Street' } });
-    fireEvent.change(getByPlaceholderText('Enter Your DOB'), { target: { value: '2000-01-01' } });
-    fireEvent.change(getByPlaceholderText('What is Your Favorite sports'), { target: { value: 'Football' } });
+    fireEvent.change(getByPlaceholderText('What is your favorite sport'), { target: { value: 'Football' } });
 
     fireEvent.click(getByText('REGISTER'));
 

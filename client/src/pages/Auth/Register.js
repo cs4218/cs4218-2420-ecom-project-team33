@@ -24,7 +24,6 @@ const Register = () => {
         password,
         phone,
         address,
-        DOB,
         answer,
       });
       if (res && res.data.success) {
@@ -100,6 +99,7 @@ const Register = () => {
               required
             />
           </div>
+          {/*
           <div className="mb-3">
             <input
               type="Date"
@@ -111,6 +111,7 @@ const Register = () => {
               required
             />
           </div>
+          */}
           <div className="mb-3">
             <input
               type="text"
@@ -118,7 +119,7 @@ const Register = () => {
               onChange={(e) => setAnswer(e.target.value)}
               className="form-control"
               id="exampleInputanswer1"
-              placeholder="What is Your Favorite sports"
+              placeholder="What is your favorite sport"
               required
             />
           </div>

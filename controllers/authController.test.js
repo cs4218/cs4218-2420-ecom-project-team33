@@ -50,7 +50,7 @@ describe("Register Controller Missing Fields Test" , () => {
     req.body = { name: "John Doe", email: "cs4218@test.com", password: "password123", address: "123 Street", answer: "Football"};
     await registerController(req, res);
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.send).toHaveBeenCalledWith({ success: false, error: "Phone no is Required" });
+    expect(res.send).toHaveBeenCalledWith({ success: false, error: "Phone number is Required" });
   });
 
   test("Returns HTTP 400 with missing address error message", async () => {
