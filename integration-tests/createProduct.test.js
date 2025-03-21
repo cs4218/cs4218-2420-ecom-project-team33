@@ -9,8 +9,6 @@ import { USERS, CATEGORIES } from "../test-data/util.js";
 
 const ADMIN_EMAIL = "admin@test.sg";
 const ADMIN_PASSWORD = "admin@test.sg";
-const USER_EMAIL = "cs4218@test.com";
-const USER_PASSWORD = "cs4218@test.com";
 
 describe("Create Product API Tests", () => {
   let productId;
