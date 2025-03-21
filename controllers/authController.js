@@ -18,7 +18,7 @@ export const registerController = async (req, res) => {
       return res.status(400).send({ success: false, error: "Password is Required" });
     }
     if (!phone) {
-      return res.status(400).send({ success: false, error: "Phone no is Required" });
+      return res.status(400).send({ success: false, error: "Phone number is Required" });
     }
     if (!address) {
       return res.status(400).send({ success: false, error: "Address is Required" });
