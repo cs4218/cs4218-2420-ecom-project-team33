@@ -34,9 +34,9 @@ const Register = () => {
       }
     } catch (error) {
       console.log(error.response);
-      if (error.response.status == 409) {
+      if (error.response && error.response.status == 409) {
         toast.error("User already exists! Please use a new email");
-      } else if (error.response.status == 400) {
+      } else if (error.response && error.response.status == 400) {
         toast.error(error.response.data.error);
       } else {
         console.log(error);

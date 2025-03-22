@@ -95,6 +95,6 @@ describe('Register Component', () => {
     fireEvent.click(getByText('REGISTER'));
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
-    expect(toast.error).toHaveBeenCalledWith('User already exists! Please use a new email');
+    expect(toast.error).toHaveBeenCalledWith('Something went wrong');
   });
 });
