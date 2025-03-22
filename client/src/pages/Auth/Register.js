@@ -33,8 +33,15 @@ const Register = () => {
         toast.error(res.data.message);
       }
     } catch (error) {
-      console.log(error);
-      toast.error("Something went wrong");
+      console.log(error.response);
+      if (error.response.status == 409) {
+        toast.error("User already exists! Please use a new email");
+      } else if (error.response.status == 400) {
+        toast.error(error.response.data.error);
+      } else {
+        console.log(error);
+        toast.error("Something went wrong");
+      }
     }
   };
 

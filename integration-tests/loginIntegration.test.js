@@ -8,8 +8,8 @@ import { USERS } from "../test-data/util.js";
 
 describe("Testing login integration tests", () => {
   beforeAll(async () => {
-    const testDB = await MongoMemoryServer.create();
     await mongoose.disconnect();
+    const testDB = await MongoMemoryServer.create();
     await mongoose.connect(testDB.getUri());
     await mongoose.connection.collection("users").insertMany(USERS);
   });
@@ -17,7 +17,6 @@ describe("Testing login integration tests", () => {
   afterAll(async () => {
     await mongoose.connection.dropDatabase();
     await mongoose.connection.close();
-    server.close();
   });
 
   test("Should successfully login with valid credentials", async () => {

@@ -26,6 +26,26 @@ export const registerController = async (req, res) => {
     if (!answer) {
       return res.status(400).send({ success: false, error: "Answer is Required" });
     }
+
+    if (name.length > 20) {
+      return res.status(400).send({ success: false, error: "Please ensure name is below 20 characters"});
+    }
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const phoneRegex = /^\d+$/;
+
+    if (!emailRegex.test(email)) {
+      return res.status(400).send({ success: false, error: "Please ensure your email is of a valid format!"});
+    }
+
+    if (password.length < 6 || password.length > 20) {
+      return res.status(400).send({ success: false, error: "Please ensure your password is between 6 and 20 characters!"});
+    }
+
+    if (!phoneRegex.test(phone) || phone.length < 5 || phone.length > 15) {
+      return res.status(400).send({ success: false, error: "Please ensure phone number is correctly formatted!"});
+    }
+
     //check user
     const exisitingUser = await userModel.findOne({ email });
     //exisiting user

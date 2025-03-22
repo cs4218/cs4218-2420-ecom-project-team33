@@ -25,18 +25,104 @@ test.describe("Login page", () => {
     ).toHaveValue("cs4218@test.com");
     await page.getByRole("button", { name: "LOGIN" }).click();
     await expect(page).toHaveURL("http://localhost:3000/");
+
+    // Confirm that we stay logged in when we refresh the page
+    await page.reload();
+    await expect(page).toHaveURL("http://localhost:3000");
+
     await expect(page.getByText("All ProductsNovel$14.99A")).toBeVisible();
     await expect(
       page.getByText(
-        "Filter By CategoryElectronicsBookClothingtestFilter By Price$0 to 19$20 to 39$"
+        "Filter By Category"
       )
     ).toBeVisible();
+    await expect(
+      page.getByRole("checkbox",
+        { name: "Electronics" }
+      )
+    ).toBeVisible();
+    await expect(
+      page.getByRole("checkbox",
+        { name: "Book" } 
+      )
+    ).toBeVisible();
+    await expect(
+      page.getByRole("checkbox",
+        { name: "Clothing" } 
+      )
+    ).toBeVisible();
+
+    await expect(
+      page.getByText(
+        "Filter By Price"
+      )
+    ).toBeVisible();
+    await expect(
+      page.getByRole("radio",
+        { name: "$0 to 19" }
+      )
+    ).toBeVisible();
+    await expect(
+      page.getByRole("radio",
+        { name: "$20 to 39" } 
+      )
+    ).toBeVisible();
+    await expect(
+      page.getByRole("radio",
+        { name: "$40 to 59" } 
+      )
+    ).toBeVisible();
+    await expect(
+      page.getByRole("radio",
+        { name: "$60 to 79" } 
+      )
+    ).toBeVisible();
+    await expect(
+      page.getByRole("radio",
+        { name: "$80 to 99" } 
+      )
+    ).toBeVisible();
+    await expect(
+      page.getByRole("radio",
+        { name: "$100 or more" } 
+      )
+    ).toBeVisible();
+
     await expect(page.getByRole("img", { name: "bannerimage" })).toBeVisible();
     await expect(
       page.getByText(
-        "🛒 Virtual VaultSearchHomeCategoriesAll CategoriesElectronicsBookClothingtestCS"
+        "🛒 Virtual Vault"
       )
     ).toBeVisible();
+    await expect(
+      page.getByText(
+        "Search"
+      )
+    ).toBeVisible();
+    await expect(
+      page.getByText(
+        "Home"
+      )
+    ).toBeVisible();
+    await expect(
+      page.getByRole(
+        "link",
+        { name: "CATEGORIES" }
+      )
+    ).toBeVisible();
+    await expect(
+      page.getByRole(
+        "link",
+        { name: "CART" }
+      )
+    ).toBeVisible();
+    await expect(
+      page.getByRole(
+        "button",
+        { name: "CS 4218 Test Account" }
+      )
+    ).toBeVisible();
+    
   });
 
   test("Invalid login credentials", async ({ page }) => {
@@ -57,9 +143,53 @@ test.describe("Login page", () => {
       .getByRole("textbox", { name: "Enter Your Password" })
       .fill("invalidpassword");
     await page.getByRole("button", { name: "LOGIN" }).click();
-    await expect(page.getByText("Something went wrong")).toBeVisible();
+    await expect(page.getByText("Invalid email or password")).toBeVisible();
     await expect(page).toHaveURL("http://localhost:3000/login");
   });
+});
+
+test("Invalid username", async ({page}) => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("http://localhost:3000/");
+  });
+
+  await page.getByRole("link", { name: "Login" }).click();
+  await expect(page).toHaveURL("http://localhost:3000/login");
+  await assertLoginPage(page);
+  await page.getByRole("button", { name: "LOGIN" }).click();
+  await expect(page).toHaveURL("http://localhost:3000/login");
+
+  await page.getByRole("textbox", { name: "Enter Your Email" }).click();
+  await page.getByRole("textbox", { name: "Enter Your Email" }).fill("invalid@email");
+  await page.getByRole("button", { name: "LOGIN" }).click();
+  await expect(page).toHaveURL("http://localhost:3000/login");
+
+  await page.getByRole("textbox", { name: "Enter Your Password" }).fill("cs4218@test.com");
+  await page.getByRole("button", { name: "LOGIN" }).click();
+  await expect(page.getByText("Invalid email or password")).toBeVisible();
+  await expect(page).toHaveURL("http://localhost:3000/login");
+});
+
+test("Invalid password", async ({page}) => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("http://localhost:3000/");
+  });
+
+  await page.getByRole("link", { name: "Login" }).click();
+  await expect(page).toHaveURL("http://localhost:3000/login");
+  await assertLoginPage(page);
+  await page.getByRole("button", { name: "LOGIN" }).click();
+  await expect(page).toHaveURL("http://localhost:3000/login");
+
+  await page.getByRole("textbox", { name: "Enter Your Email" }).click();
+  await page.getByRole("textbox", { name: "Enter Your Email" }).fill("cs4218@test.com");
+  await page.getByRole("button", { name: "LOGIN" }).click();
+  await expect(page).toHaveURL("http://localhost:3000/login");
+
+  await page.getByRole("textbox", { name: "Enter Your Password" }).fill("invalidpassword");
+  await page.getByRole("button", { name: "LOGIN" }).click();
+  await expect(page.getByText("Invalid email or password")).toBeVisible();
+  await expect(page).toHaveURL("http://localhost:3000/login");
 });
 
 test.describe("Forget password page", () => {

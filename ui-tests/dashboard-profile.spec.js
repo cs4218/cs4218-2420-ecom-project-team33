@@ -23,7 +23,7 @@ const TEST_USER = {
   email: "cs4218@test.com",
   password: "cs4218@test.com",
   name: "CS 4218 Test Account",
-  phone: "81574322",
+  phone: "81234567",
   address: "1 Computing Drive"
 };
 
