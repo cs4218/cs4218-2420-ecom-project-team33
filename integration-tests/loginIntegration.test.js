@@ -9,7 +9,6 @@ import { USERS } from "../test-data/util.js";
 describe("Testing login integration tests", () => {
   beforeAll(async () => {
     const testDB = await MongoMemoryServer.create();
-    await mongoose.disconnect();
     await mongoose.connect(testDB.getUri());
     await mongoose.connection.collection("users").insertMany(USERS);
   });
