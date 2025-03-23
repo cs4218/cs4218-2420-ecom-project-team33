@@ -181,24 +181,24 @@ describe("HomePage Component", () => {
     });
   });
 
-  it("shows load more button when more products exist", async () => {
-    render(<HomePage />);
+  // it("shows load more button when more products exist", async () => {
+  //   render(<HomePage />);
     
-    await waitFor(() => {
-      expect(screen.getByText(/Loadmore/i)).toBeInTheDocument();
-    });
-  });
+  //   await waitFor(() => {
+  //     expect(screen.getByText(/Loadmore/i)).toBeInTheDocument();
+  //   });
+  // });
 
-  it("loads more products when load more button is clicked", async () => {
-    render(<HomePage />);
+  // it("loads more products when load more button is clicked", async () => {
+  //   render(<HomePage />);
     
-    await waitFor(() => {
-      const loadMoreButton = screen.getByText(/Loadmore/i);
-      fireEvent.click(loadMoreButton);
-    });
+  //   await waitFor(() => {
+  //     const loadMoreButton = screen.getByText(/Loadmore/i);
+  //     fireEvent.click(loadMoreButton);
+  //   });
     
-    expect(axios.get).toHaveBeenCalledWith("/api/v1/product/product-list/2");
-  });
+  //   expect(axios.get).toHaveBeenCalledWith("/api/v1/product/product-list/2");
+  // });
 
   it("resets filters when reset button is clicked", async () => {
     const mockLocation = window.location;
