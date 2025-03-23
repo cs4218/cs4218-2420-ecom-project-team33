@@ -17,6 +17,7 @@ describe("Testing login integration tests", () => {
   afterAll(async () => {
     await mongoose.connection.dropDatabase();
     await mongoose.connection.close();
+    server.close();
   });
 
   test("Should successfully login with valid credentials", async () => {
