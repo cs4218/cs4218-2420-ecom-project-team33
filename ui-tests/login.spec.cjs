@@ -147,49 +147,46 @@ test.describe("Login page", () => {
     await expect(page).toHaveURL("http://localhost:3000/login");
   });
 });
-
-test("Invalid username", async ({page}) => {
+test.describe("Invalid inputs", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("http://localhost:3000/");
   });
 
-  await page.getByRole("link", { name: "Login" }).click();
-  await expect(page).toHaveURL("http://localhost:3000/login");
-  await assertLoginPage(page);
-  await page.getByRole("button", { name: "LOGIN" }).click();
-  await expect(page).toHaveURL("http://localhost:3000/login");
+  test("Invalid username", async ({page}) => {
+    await page.getByRole("link", { name: "Login" }).click();
+    await expect(page).toHaveURL("http://localhost:3000/login");
+    await assertLoginPage(page);
+    await page.getByRole("button", { name: "LOGIN" }).click();
+    await expect(page).toHaveURL("http://localhost:3000/login");
 
-  await page.getByRole("textbox", { name: "Enter Your Email" }).click();
-  await page.getByRole("textbox", { name: "Enter Your Email" }).fill("invalid@email");
-  await page.getByRole("button", { name: "LOGIN" }).click();
-  await expect(page).toHaveURL("http://localhost:3000/login");
+    await page.getByRole("textbox", { name: "Enter Your Email" }).click();
+    await page.getByRole("textbox", { name: "Enter Your Email" }).fill("invalid@email");
+    await page.getByRole("button", { name: "LOGIN" }).click();
+    await expect(page).toHaveURL("http://localhost:3000/login");
 
-  await page.getByRole("textbox", { name: "Enter Your Password" }).fill("cs4218@test.com");
-  await page.getByRole("button", { name: "LOGIN" }).click();
-  await expect(page.getByText("Invalid email or password")).toBeVisible();
-  await expect(page).toHaveURL("http://localhost:3000/login");
-});
-
-test("Invalid password", async ({page}) => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto("http://localhost:3000/");
+    await page.getByRole("textbox", { name: "Enter Your Password" }).fill("cs4218@test.com");
+    await page.getByRole("button", { name: "LOGIN" }).click();
+    await expect(page.getByText("Invalid email or password")).toBeVisible();
+    await expect(page).toHaveURL("http://localhost:3000/login");
   });
 
-  await page.getByRole("link", { name: "Login" }).click();
-  await expect(page).toHaveURL("http://localhost:3000/login");
-  await assertLoginPage(page);
-  await page.getByRole("button", { name: "LOGIN" }).click();
-  await expect(page).toHaveURL("http://localhost:3000/login");
+  test("Invalid password", async ({page}) => {
+    await page.getByRole("link", { name: "Login" }).click();
+    await expect(page).toHaveURL("http://localhost:3000/login");
+    await assertLoginPage(page);
+    await page.getByRole("button", { name: "LOGIN" }).click();
+    await expect(page).toHaveURL("http://localhost:3000/login");
 
-  await page.getByRole("textbox", { name: "Enter Your Email" }).click();
-  await page.getByRole("textbox", { name: "Enter Your Email" }).fill("cs4218@test.com");
-  await page.getByRole("button", { name: "LOGIN" }).click();
-  await expect(page).toHaveURL("http://localhost:3000/login");
+    await page.getByRole("textbox", { name: "Enter Your Email" }).click();
+    await page.getByRole("textbox", { name: "Enter Your Email" }).fill("cs4218@test.com");
+    await page.getByRole("button", { name: "LOGIN" }).click();
+    await expect(page).toHaveURL("http://localhost:3000/login");
 
-  await page.getByRole("textbox", { name: "Enter Your Password" }).fill("invalidpassword");
-  await page.getByRole("button", { name: "LOGIN" }).click();
-  await expect(page.getByText("Invalid email or password")).toBeVisible();
-  await expect(page).toHaveURL("http://localhost:3000/login");
+    await page.getByRole("textbox", { name: "Enter Your Password" }).fill("invalidpassword");
+    await page.getByRole("button", { name: "LOGIN" }).click();
+    await expect(page.getByText("Invalid email or password")).toBeVisible();
+    await expect(page).toHaveURL("http://localhost:3000/login");
+  });
 });
 
 test.describe("Forget password page", () => {
