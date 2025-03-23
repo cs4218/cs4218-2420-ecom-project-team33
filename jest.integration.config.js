@@ -12,6 +12,8 @@ export default { // do not change
 
   transform: {},
 
+  workerIdleMemoryLimit: '512MB',
+ 
   // jest code coverage
   collectCoverage: true,
   collectCoverageFrom: ["controllers/*.js", "!controllers/*.test.js"],

@@ -24,7 +24,6 @@ const Register = () => {
         password,
         phone,
         address,
-        DOB,
         answer,
       });
       if (res && res.data.success) {
@@ -34,8 +33,15 @@ const Register = () => {
         toast.error(res.data.message);
       }
     } catch (error) {
-      console.log(error);
-      toast.error("Something went wrong");
+      console.log(error.response);
+      if (error.response && error.response.status == 409) {
+        toast.error("User already exists! Please use a new email");
+      } else if (error.response && error.response.status == 400) {
+        toast.error(error.response.data.error);
+      } else {
+        console.log(error);
+        toast.error("Something went wrong");
+      }
     }
   };
 
@@ -100,6 +106,7 @@ const Register = () => {
               required
             />
           </div>
+          {/*
           <div className="mb-3">
             <input
               type="Date"
@@ -111,6 +118,7 @@ const Register = () => {
               required
             />
           </div>
+          */}
           <div className="mb-3">
             <input
               type="text"
@@ -118,7 +126,7 @@ const Register = () => {
               onChange={(e) => setAnswer(e.target.value)}
               className="form-control"
               id="exampleInputanswer1"
-              placeholder="What is Your Favorite sports"
+              placeholder="What is your favorite sport"
               required
             />
           </div>

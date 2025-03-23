@@ -26,7 +26,7 @@ describe("Register Controller Missing Fields Test" , () => {
 
 
   test("Returns HTTP 400 with missing name error message", async () => {
-    req.body = { email: "cs4218@test.com", password: "password123", phone: "12344000", address: "123 Street", answer: "Football" };
+    req.body = { email: "test@test.com", password: "password123", phone: "12344000", address: "123 Street", answer: "Football" };
     await registerController(req, res);
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({ success: false, error: "Name is Required" });
@@ -40,28 +40,28 @@ describe("Register Controller Missing Fields Test" , () => {
   });
 
   test("Returns HTTP 400 with missing password error message", async () => {
-    req.body = { name: "John Doe", email: "cs4218@test.com", phone: "12344000", address: "123 Street", answer: "Football" };
+    req.body = { name: "John Doe", email: "test@test.com", phone: "12344000", address: "123 Street", answer: "Football" };
     await registerController(req, res);
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({ success: false, error: "Password is Required" });
   });
 
   test("Returns HTTP 400 with missing phone number error message", async () => {
-    req.body = { name: "John Doe", email: "cs4218@test.com", password: "password123", address: "123 Street", answer: "Football"};
+    req.body = { name: "John Doe", email: "test@test.com", password: "password123", address: "123 Street", answer: "Football"};
     await registerController(req, res);
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.send).toHaveBeenCalledWith({ success: false, error: "Phone no is Required" });
+    expect(res.send).toHaveBeenCalledWith({ success: false, error: "Phone number is Required" });
   });
 
   test("Returns HTTP 400 with missing address error message", async () => {
-    req.body = { name: "John Doe", email: "cs4218@test.com", password: "password123", phone: "12344000", answer: "Football"};
+    req.body = { name: "John Doe", email: "test@test.com", password: "password123", phone: "12344000", answer: "Football"};
     await registerController(req, res);
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({ success: false, error: "Address is Required" });
   });
 
   test("Returns HTTP 400 with missing answer error message", async () => {
-    req.body = { name: "John Doe", email: "cs4218@test.com", password: "password123", phone: "12344000", address: "123 Street" };
+    req.body = { name: "John Doe", email: "test@test.com", password: "password123", phone: "12344000", address: "123 Street" };
     await registerController(req, res);
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({ success: false, error: "Answer is Required" }); 
@@ -76,7 +76,7 @@ describe("Register Controller Valid and Invalid inputs Test", () => {
     req = {
       body: {
         name: "John Doe",
-        email: "cs4218@test.com",
+        email: "test@test.com",
         password: "password123",
         phone: "12344000",
         address: "123 Street",
@@ -136,7 +136,7 @@ describe("Login Controller Test", () => {
   beforeEach(() => {
     req = {
       body: {
-        email: "cs4218@test.com",
+        email: "test@test.com",
         password: "password123",
       },
     };
@@ -173,11 +173,11 @@ describe("Login Controller Test", () => {
   
   test("Returns HTTP 400 with invalid email or password message", async () => {
     const mockUser = {
-      email: "cs4218@test.com",
+      email: "test@test.com",
       password: "wrongpassword"
     };
     req.body = {
-      email: "cs4218@test.com",
+      email: "test@test.com",
       password: "password123"
     };
     userModel.findOne = jest.fn().mockResolvedValue(mockUser);
@@ -198,11 +198,11 @@ describe("Login Controller Test", () => {
 
   test("Tests successful login with HTTP 200", async () => {
     const mockUser = {
-      email: "cs4218@test.com",
+      email: "test@test.com",
       password: "password123"
     };
     req.body = {
-      email: "cs4218@test.com",
+      email: "test@test.com",
       password: "password123"
     };
     userModel.findOne = jest.fn().mockResolvedValue(req.body);
@@ -226,7 +226,7 @@ describe("Login Controller Test", () => {
 
   test("Error with HTTP code 500", async () => {
     req.body = {
-      email: "cs4218@test.com",
+      email: "test@test.com",
       password: "password123"
     };
     userModel.findOne = jest.fn().mockRejectedValue(new Error("MongoDB issue"));
@@ -266,7 +266,7 @@ describe("Forgot Password Controller Test", () => {
   });
 
   test("Empty answer with status code 400", async () => {
-    req.body = {email: "cs4218@test.com", newPassword: "password124"};
+    req.body = {email: "test@test.com", newPassword: "password124"};
     await forgotPasswordController(req, res);
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
@@ -276,7 +276,7 @@ describe("Forgot Password Controller Test", () => {
   });
 
   test("Empty password with status code 400", async () => {
-    req.body = {email: "cs4218@test.com", answer: "Football"};
+    req.body = {email: "test@test.com", answer: "Football"};
     await forgotPasswordController(req, res);
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
@@ -304,7 +304,7 @@ describe("Forgot Password Controller Test", () => {
 
   test("Wrong answer with status code 404", async () => {
     req.body = {
-      email: "cs4218@test.com", 
+      email: "test@test.com", 
       answer: "invalid",
       newPassword: "password124"
     };
@@ -321,7 +321,7 @@ describe("Forgot Password Controller Test", () => {
   });
 
   test("Successful password reset with status code 200", async () => {
-    req.body = {email: "cs4218@test.com", answer: "Football", newPassword: "password124"};
+    req.body = {email: "test@test.com", answer: "Football", newPassword: "password124"};
     userModel.findOne = jest.fn().mockResolvedValue(req.body);
     const hashedPassword = "hashed_password124";
 
@@ -338,7 +338,7 @@ describe("Forgot Password Controller Test", () => {
 
   test("Error with HTTP code 500", async () => {
     req.body = {
-      email: "cs4218@test.com",
+      email: "test@test.com",
       answer: "Football",
       newPassword: "password124"
     };

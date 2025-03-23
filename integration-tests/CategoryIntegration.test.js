@@ -2,9 +2,7 @@ import request from "supertest";
 import mongoose from "mongoose";
 import { server, app } from "../server.js";
 import categoryModel from "../models/categoryModel.js";
-import { createCategoryController } from "../controllers/categoryController.js";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import connectDB from "../config/db.js";
 import { USERS, PRODUCTS, CATEGORIES } from "../test-data/util.js";
 
 const ADMIN_EMAIL = "admin@test.sg";

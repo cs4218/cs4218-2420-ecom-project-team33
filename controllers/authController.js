@@ -18,7 +18,7 @@ export const registerController = async (req, res) => {
       return res.status(400).send({ success: false, error: "Password is Required" });
     }
     if (!phone) {
-      return res.status(400).send({ success: false, error: "Phone no is Required" });
+      return res.status(400).send({ success: false, error: "Phone number is Required" });
     }
     if (!address) {
       return res.status(400).send({ success: false, error: "Address is Required" });
@@ -26,6 +26,26 @@ export const registerController = async (req, res) => {
     if (!answer) {
       return res.status(400).send({ success: false, error: "Answer is Required" });
     }
+
+    if (name.length > 20) {
+      return res.status(400).send({ success: false, error: "Please ensure name is below 20 characters"});
+    }
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const phoneRegex = /^\d+$/;
+
+    if (!emailRegex.test(email)) {
+      return res.status(400).send({ success: false, error: "Please ensure your email is of a valid format!"});
+    }
+
+    if (password.length < 6 || password.length > 20) {
+      return res.status(400).send({ success: false, error: "Please ensure your password is between 6 and 20 characters!"});
+    }
+
+    if (!phoneRegex.test(phone) || phone.length < 5 || phone.length > 15) {
+      return res.status(400).send({ success: false, error: "Please ensure phone number is correctly formatted!"});
+    }
+
     //check user
     const exisitingUser = await userModel.findOne({ email });
     //exisiting user
@@ -165,7 +185,7 @@ export const testController = (req, res) => {
   }
 };
 
-//update prfole
+//update profile
 export const updateProfileController = async (req, res) => {
   try {
     const { name, password, address, phone } = req.body;
@@ -212,11 +232,12 @@ export const getOrdersController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Error WHile Geting Orders",
+      message: "Error While Getting Orders",
       error,
     });
   }
 };
+
 //orders
 export const getAllOrdersController = async (req, res) => {
   try {
@@ -224,13 +245,13 @@ export const getAllOrdersController = async (req, res) => {
       .find({})
       .populate("products", "-photo")
       .populate("buyer", "name")
-      .sort({ createdAt: "-1" });
+      .sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Error WHile Geting Orders",
+      message: "Error While Getting All Orders",
       error,
     });
   }
@@ -241,6 +262,12 @@ export const orderStatusController = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { status } = req.body;
+    if (!status) {
+      return res.status(500).send({
+        success: false,
+        message: "Missing Order Status",
+      });
+    }
     const orders = await orderModel.findByIdAndUpdate(
       orderId,
       { status },
@@ -251,7 +278,7 @@ export const orderStatusController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Error While Updateing Order",
+      message: "Error While Updating Order Status",
       error,
     });
   }

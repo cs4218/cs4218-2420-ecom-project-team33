@@ -3,6 +3,7 @@ import { Binary } from "mongodb";
 
 const USERS = [
   {
+    _id: new mongoose.Types.ObjectId("67a218decf4efddf1e5358ac"),
     name: "CS 4218 Test Account",
     email: "cs4218@test.com",
     password: "$2b$10$//wWsN./fEX1WiipH57HG.SAwgkYv1MRrPSkpXM38Dy5seOEhCoUy",
@@ -50,11 +51,11 @@ const CATEGORIES = [
 ];
 
 const ORDERS = {
-  _id: "67a21938cf4efddf1e5358d1",
+  _id: new mongoose.Types.ObjectId("67a21938cf4efddf1e5358d1"),
   products: [
-    "67a21772a6d9e00ef2ac022a",
-    "66db427fdb0119d9234b27f3",
-    "66db427fdb0119d9234b27f3",
+    new mongoose.Types.ObjectId("67a21772a6d9e00ef2ac022a"),
+    new mongoose.Types.ObjectId("66db427fdb0119d9234b27f3"),
+    new mongoose.Types.ObjectId("66db427fdb0119d9234b27f3"),
   ],
   payment: {
     errors: {
@@ -101,7 +102,7 @@ const ORDERS = {
       "Amount is an invalid format.\nCredit card number is not an accepted test number.",
     success: false,
   },
-  buyer: "67a218decf4efddf1e5358ac",
+  buyer: new mongoose.Types.ObjectId("67a218decf4efddf1e5358ac"),
   status: "Not Process",
   createdAt: "2025-02-04T13:42:16.741Z",
   updatedAt: "2025-02-04T13:42:16.741Z",
